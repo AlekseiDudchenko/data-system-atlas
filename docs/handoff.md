@@ -1,17 +1,9 @@
-# Session checkpoint — resume later
+# Bootstrap verification completed — issue #15
 
-The user paused work before merge on 2026-10-26. GitHub Actions is currently unavailable for their workflow and must not block local checks or merge. Do not wait for paid Actions minutes.
+Work resumed on 2026-10-26 with the user's explicit authorization to merge PR #14 after successful local checks, without waiting for GitHub Actions.
 
-Start from [issue #15](https://github.com/AlekseiDudchenko/data-system-atlas/issues/15) and existing [PR #14](https://github.com/AlekseiDudchenko/data-system-atlas/pull/14). The repository is `data-system-atlas` (singular), product name Data Systems Atlas. Fetch latest main and feature branch; do not recreate the project.
+The application at `1a8f8c3d01c85e8ea51c161f1fbd2d390720d95f`, including the final preview-script checkpoint, passed clean installation, typecheck, lint, seven unit tests, production build, and eight desktop/mobile Playwright tests. The exact Astro preview command uses one explicit loopback host. Managed Chromium was installed successfully; no Python server or custom browser executable was needed. See [validation](validation.md) and [review](review.md) for evidence and limitations.
 
-## Completed
+No additional application changes were needed. PR #14 delivers the platform, content contract, deterministic model and first stale-read lesson (#6–#10). The previous independent source review remains applicable.
 
-Documentation, three ADRs, linked epics/backlog, static Astro app and first interactive replication lesson are in the PR. Independent review passed. Typecheck, lint, 7 unit tests, build, and 8 desktop/mobile browser tests passed before the final preview-script checkpoint. Screenshots and reports are committed.
-
-## Pending
-
-The latest checkpoint removes duplicate `--host` arguments from npm dev/preview scripts. Its final verification was interrupted by blocked Astro telemetry. Set `ASTRO_TELEMETRY_DISABLED=1`, then verify the default Astro preview startup and rerun the local gates. The previous successful E2E run used a Python static-server fallback and local Chromium; do not confuse that result with validation of the latest default preview configuration.
-
-A remote CI attempt timed out before browser tests because the preview server was not ready. Investigate the launch configuration under #15, but do not require a successful Actions run while the user's pipelines are unavailable. Deferred Actions restoration is #16.
-
-PR #14 is intentionally open and unmerged. After local gates and review pass, merge as authorized by the original bootstrap task. Cloudflare deployment remains blocked on account access and is tracked in #13. Future lessons are #11 (read-your-writes) and #12 (partitioning/hotspots).
+Remaining work stays separate: Cloudflare Pages deployment and production verification (#13), future read-your-writes and partitioning lessons (#11, #12), and non-blocking GitHub Actions restoration (#16). GitHub Actions is not a prerequisite for local development or merge. No public deployment is claimed.

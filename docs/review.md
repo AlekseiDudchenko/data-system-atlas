@@ -16,3 +16,7 @@ Follow-up review also verified that extracting the static hero into `LessonHero.
 The reviewer confirmed no remaining significant source findings: deterministic transitions are independent of React and clocks; FIFO, queue retention, restore-on-next-step and historical reads match the prose. Educational boundaries distinguish acknowledgment from durability and selective link failure from node outage. Original text and SVG have appropriate source attribution, and the architecture remains small.
 
 Review approval was conditional on the primary agent's final build, browser, axe and visual checks. Their results are recorded in [validation](validation.md). This is a code/content review, not full assistive-technology certification or a formal copyright opinion.
+
+## Final launch configuration verification — issue #15
+
+The only executable change after the independently reviewed implementation was removal of embedded `--host 0.0.0.0` options from the npm dev/preview scripts. The existing Playwright command now expands to `astro preview --host 127.0.0.1 --ignore-lock`, with one explicit loopback host. This configuration was inspected and exercised directly, then used by all eight passing production-build browser tests with managed Chromium. Typecheck, lint, seven unit tests and build also passed. No further source fixes were required; this follow-up is primary-agent verification, not a new independent review. Earlier independent findings remain resolved.
