@@ -1,0 +1,51 @@
+---
+import "../styles/global.css";
+interface Props {
+  title?: string;
+  frontmatter?: { title: string; description?: string };
+  description?: string;
+}
+const title =
+  Astro.props.title ?? Astro.props.frontmatter?.title ?? "Data Systems Atlas";
+const description =
+  Astro.props.description ??
+  Astro.props.frontmatter?.description ??
+  "Explore, break, and understand data systems through original interactive experiments.";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title} · Data Systems Atlas</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <a class="skip" href="#main">
+      Skip to content
+    </a>
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-icon" aria-hidden="true">
+          ◈
+        </span>{" "}
+        Data Systems Atlas
+      </a>
+      <nav aria-label="Main">
+        <a href="/#atlas">Explore the atlas</a>
+        <a href="https://github.com/AlekseiDudchenko/data-system-atlas">
+          GitHub ↗
+        </a>
+      </nav>
+    </header>
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <footer>
+      <span>Data Systems Atlas · Explore. Break. Understand.</span>
+      <span>An independent, open-source learning project.</span>
+    </footer>
+  </body>
+</html>
