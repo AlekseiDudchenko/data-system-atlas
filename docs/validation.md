@@ -1,5 +1,7 @@
 # Bootstrap validation
 
+**Checkpoint:** The results below cover the reviewed application before a final npm preview-script change. That small change still needs verification; work is intentionally paused before merge. See [handoff](handoff.md) and issue #15. GitHub Actions is not a prerequisite for resuming or merging after successful local checks.
+
 Validated 2026-10-26 against the final implementation. Existing repository inspected: `AlekseiDudchenko/data-system-atlas` (singular). It was empty: no commits, files, prior documentation, or issues. A minimal initialization commit established main; implementation uses `feat/atlas-foundation-stale-reads`. No second repository was created.
 
 | Gate                                               | Result                                                                               |
