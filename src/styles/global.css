@@ -184,6 +184,7 @@ main {
   border-color: #70967b;
 }
 .topic a {
+  display: block;
   font-size: 0.84rem;
   font-weight: 700;
 }
@@ -320,6 +321,15 @@ small {
   background: #fff0d5;
   border-color: #a25b13;
   color: #71410f;
+}
+.session-actions {
+  margin-top: 12px;
+}
+.session-summary {
+  overflow-wrap: anywhere;
+}
+.topic a + a {
+  margin-top: 10px;
 }
 .observations {
   display: grid;

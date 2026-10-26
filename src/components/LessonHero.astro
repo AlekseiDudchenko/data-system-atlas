@@ -4,15 +4,16 @@ interface Props {
   subtitle: string;
   description: string;
   tags: string[];
+  experiment?: string;
 }
-const { title, subtitle, description, tags } = Astro.props;
+const { title, subtitle, description, tags, experiment = "01" } = Astro.props;
 ---
 
 <div class="lesson-hero">
   <a class="breadcrumb" href="/#atlas">
     Atlas / Replication
   </a>
-  <span class="eyebrow">EXPERIMENT 01 · ABOUT 10 MINUTES</span>
+  <span class="eyebrow">EXPERIMENT {experiment} · ABOUT 10 MINUTES</span>
   <h1>
     {title} <br />
     <em>{subtitle}</em>

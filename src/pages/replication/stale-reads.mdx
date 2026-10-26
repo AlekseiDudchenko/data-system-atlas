@@ -46,6 +46,8 @@ Acknowledging at the leader without waiting for followers keeps follower delay o
 
 Reading the leader, waiting for a particular version at a replica, or providing session guarantees are possible design directions. Each introduces costs and failure cases. We do not simulate them here. Real database guarantees depend on the product, topology, acknowledgment policy, read routing, and configuration; “replicated” alone specifies very little.
 
+Next: [Read Your Writes](/replication/read-your-writes) compares an immediate follower read with a read that waits for your session's last acknowledged write.
+
 ## Model boundaries
 
 - One leader and two followers; one key containing a string. All start at v0.
