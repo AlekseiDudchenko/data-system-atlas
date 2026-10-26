@@ -1,0 +1,76 @@
+---
+layout: ../../layouts/Layout.astro
+title: Partitioning and Hotspots
+description: Route a repeatable workload across three partitions and discover why balanced key placement does not guarantee balanced traffic.
+---
+
+import LessonHero from "../../components/LessonHero.astro";
+import PartitionLab from "../../components/PartitionLab";
+
+<LessonHero
+  title="Partitioning"
+  subtitle="and Hotspots"
+  territory="Partitioning"
+  experiment="03"
+  description="Twelve keys, three owners, and enough total capacity. Change who gets the requests and discover why one queue can grow while other partitions sit idle."
+  tags={["Key routing", "Workload skew", "Local capacity"]}
+/>
+
+<PartitionLab client:load />
+
+<div className="prose-grid">
+<section>
+
+## Predict the busiest owner
+
+Imagine requests to twelve product pages, identified by keys **0–11**. Each key has one fixed owner: **partition = key modulo 3**. P0 owns 0, 3, 6 and 9; P1 owns 1, 4, 7 and 10; P2 owns 2, 5, 8 and 11. Four keys each. Does this guarantee equal work?
+
+Each step, every partition can complete up to **four equal-cost requests**. A batch adds twelve requests before service begins. Predict the queues, then compare:
+
+1. Keep **Even keys** and press **Send 12 requests + step**. One request visits every key. Arrivals are **4 / 4 / 4**; all twelve finish and no queue remains.
+2. Choose **Hot key**. This starts a fresh run with the same placement. Key 0 receives nine requests; keys 1, 2 and 3 receive one each. Predict which partition owns most of this work.
+3. Send a batch. Arrivals are **10 / 1 / 1**. P0 finishes four and queues six. P1 and P2 each finish one. Twelve units of aggregate capacity existed, but only six requests completed.
+4. Send another batch. P0's queue grows to **twelve**. Choose **Drain one step** three times to clear it without adding arrivals.
+
+The bars show each partition's share of all requests received, on a fixed 0–100% scale. The table gives exact arrivals, completed work and queued requests. Rounded shares may not sum to 100%.
+
+## Placement is not traffic
+
+Both workloads place four keys on each partition. Only their request frequencies differ. The hot workload sends **75% of requests to one key**. Another request visits a different key on the same owner, so that partition receives **10 of 12 requests**, about 83%.
+
+Try hot key 1. The heavy traffic moves to P1. Try hot key 3: it returns to P0. Moving between keys is not the same as distributing load across owners. You can inspect every key's owner in the selector and table.
+
+## Keep the pressure on
+
+Repeated batches demonstrate a capacity mismatch. Under the hot workload, the busiest partition receives ten requests but serves only four each step: its queue grows by six per batch. Free capacity on another owner does not automatically process those requests. **Drain one step** pauses arrivals, not service, so the queue shrinks by up to four.
+
+Changing workload or hot key clears the run so comparisons start from zero; it does not migrate existing requests. **Reset run** clears counters while keeping your choices. Reload returns to the default even workload.
+
+</section>
+<section>
+
+## What could an engineer change?
+
+A viral product page can concentrate work even when key counts look balanced. Look at per-key and per-partition activity, request cost, queues and capacity rather than just counting stored keys.
+
+Caching repeated reads can reduce work reaching the owner. Moving a hot key changes which owner carries its traffic. Splitting a logical key into multiple physical keys can distribute some workloads, but may require scatter/gather reads, aggregation or a different ordering/atomicity contract. Adding partitions can spread other keys; a single indivisible hot key still has one owner under this routing rule. None of these remedies is implemented by this experiment.
+
+## Model boundaries
+
+- Three fixed logical partitions, twelve integer keys and explicit modulo routing. This is a teaching rule, not a production hash function or a model of a vendor's physical placement.
+- Every request has identical cost. Each owner serves up to four requests per logical step, after arrivals, including queued work from earlier steps. Unused capacity is lost for that step and cannot be borrowed.
+- Even batches contain each key once. Hot batches contain nine copies of the chosen key and the next three keys cyclically, once each. There is no randomness or measured production workload.
+- Requests are represented by per-partition counters, not stored records, values, individual response times or ordered operations. No latency percentiles, durability or throughput benchmark is claimed.
+- Queues retain all uncompleted work; no rejection, timeout, retry or backpressure. This intentionally makes overload visible as queue growth. Real systems may throttle or shed work instead.
+- Only batch and drain actions advance logical time. No clocks, network failures, replication, concurrent execution, rebalancing, persistence or automatic scaling. Changing choices starts a new experiment rather than simulating migration.
+
+## Take it to a design discussion
+
+A catalogue is evenly partitioned, but one launch overwhelms a product page. **Is the limiting factor key placement, request frequency, request cost or capacity?** Which remedy changes the work reaching the owner, and which merely moves that work? What guarantees would you need to revisit if you split the key?
+
+## Sources and further reading
+
+The prose, diagram, workload and model are original. For a concrete product's guidance, AWS recommends considering access patterns and distributing activity across partition keys in [DynamoDB partition-key best practices](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-partition-key-design.html) (reviewed 2026-10-26). DynamoDB's capacity units, adaptive capacity and placement behavior are product-specific; the four-requests-per-step rule here is invented for teaching.
+
+</section>
+</div>

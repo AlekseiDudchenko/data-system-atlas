@@ -2,7 +2,7 @@
 
 ## Static pages, local experiments
 
-Astro renders the home page and two MDX lessons at build time. Each lesson hydrates one React experiment using `client:load`. Shared SVG topology and full node values accompany native HTML controls and read feedback; the first experiment also presents message and event lists. No server adapter, API, database, authentication, or persistent browser storage is introduced.
+Astro renders the home page and three MDX lessons at build time. Each lesson hydrates one React experiment using `client:load`. Shared SVG topology and full node values accompany the replication controls; the partitioning lesson provides a fixed-scale SVG chart and a semantic counter table. No server adapter, API, database, authentication, or persistent browser storage is introduced.
 
 ## Boundaries
 
@@ -13,6 +13,8 @@ Astro renders the home page and two MDX lessons at build time. Each lesson hydra
 | `src/components/ReplicationLab.tsx` | UI state, dispatch, SVG and HTML views                |
 | `src/simulation/replication.ts`     | Pure model and event transitions                      |
 | `src/simulation/session.ts`         | Sequential client minimum and pending-read contract   |
+| `src/simulation/partitioning.ts`    | Fixed key routing, workload and service counters      |
+| `src/components/PartitionLab.tsx`   | Workload controls, SVG shares and exact counter table |
 | `src/components/SessionLab.tsx`     | Read-your-writes comparison and waiting/cancel UI      |
 | `src/components/ReplicationTopology.tsx` | Shared concrete SVG and full node values          |
 | `src/simulation/*.test.ts`          | Model contracts                                       |
@@ -29,9 +31,11 @@ All model state is typed readonly; transitions replace changed collections and d
 
 ## Content and extension
 
-Use MDX for a lesson with a single island imported explicitly. Content guidelines define a common editorial contract rather than a custom schema or registry. The home page names all eight territories and links the two working replication lessons. The second lesson reuses the existing replication transitions through a small session wrapper; it does not require a generic engine or content registry.
+Use MDX for a lesson with a single island imported explicitly. Content guidelines define a common editorial contract rather than a custom schema or registry. The home page names all eight territories and links two replication lessons and one partitioning lesson. The session lesson reuses the replication transitions through a small wrapper; partitioning has its own pure reducer. Neither requires a generic engine or content registry.
 
 The session wrapper records the last acknowledged write version for one client. An ordinary read returns immediately; a session read waits for the chosen follower to reach the captured minimum. Only delivery steps resolve pending reads. New writes/reads are rejected while waiting, enforcing sequential operations; cancellation retains the minimum, reset clears it, and completed results remain historical. See [ADR 0004](docs/adr/0004-session-minimum.md).
+
+Partitioning uses twelve keys and three fixed modulo owners. Each batch adds twelve equal-cost requests, then serves up to four per owner. Even batches generate 4/4/4 arrivals; hot batches generate 10/1/1, rotated by the chosen key's owner. Drain steps serve queued work without arrivals. Configuration changes reset counters, while reset retains choices. Counters conserve received = completed + queued. No per-request latency or migration is implied. See [ADR 0005](docs/adr/0005-partition-workload.md).
 
 ## Quality and operations
 

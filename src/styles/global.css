@@ -328,6 +328,39 @@ small {
 .session-summary {
   overflow-wrap: anywhere;
 }
+.partition-actions {
+  margin-top: 24px;
+}
+.partition-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 24px 0;
+}
+.partition-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  text-align: left;
+}
+.partition-table caption {
+  text-align: left;
+  font-weight: 700;
+  margin: 20px 0 12px;
+}
+.partition-table th,
+.partition-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 12px 5px;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+.partition-keys {
+  display: block;
+  font-weight: 400;
+  margin-top: 6px;
+}
 .topic a + a {
   margin-top: 10px;
 }
