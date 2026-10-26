@@ -12,6 +12,8 @@ For an authorized CLI session, run `npx wrangler pages deploy dist --project-nam
 
 Verify the returned URL serves `/`, `/replication/stale-reads`, and `/favicon.svg`, including a direct lesson navigation and hard refresh. In a browser, reproduce write → stale read → two steps → current read. Check a blocked follower catches up only after restore and another step. Confirm mobile reflow, HTTPS, and expected security headers. Save the deployed commit and URL in the release record.
 
+Also verify `/replication/read-your-writes` by direct navigation and hard refresh. Block B, write, compare immediate and session reads, advance twice, confirm the session read remains waiting, then restore and step to complete it. Verify canceling a waiting read retains the session minimum before retrying on A.
+
 Rollback using Cloudflare Pages' prior production deployment promotion, or revert the source commit through a reviewed PR and rebuild. Test the same smoke scenario after rollback.
 
 ## Bootstrap deployment status

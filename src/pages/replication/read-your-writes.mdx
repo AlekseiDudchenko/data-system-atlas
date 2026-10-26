@@ -1,0 +1,77 @@
+---
+layout: ../../layouts/Layout.astro
+title: Read Your Writes
+description: Compare an immediate follower read with a session read that waits for your last acknowledged write, and discover the availability cost.
+---
+
+import LessonHero from "../../components/LessonHero.astro";
+import SessionLab from "../../components/SessionLab";
+
+<LessonHero
+  title="Read Your"
+  subtitle="Writes"
+  experiment="02"
+  description="You saved a new profile name. Should your next read show it? Carry a session minimum to a follower and discover what happens when that follower cannot catch up."
+  tags={["Session guarantees", "Minimum version", "Waiting vs availability"]}
+/>
+
+<SessionLab client:load />
+
+<div className="prose-grid">
+<section>
+
+## Predict the next screen
+
+Start with [Replication and Stale Reads](/replication/stale-reads) if replication lag is new to you. Here, **you** are the only client. All replicas start with **Hello** at v0.
+
+Write **New name**. The leader acknowledges v1 and your session remembers a minimum of v1. Before advancing time, what should each read policy do?
+
+1. Choose follower B and press **Read immediately**. It returns **Hello**, v0. The request carried no minimum beyond v0.
+2. Press **Read my writes**. B has v0 but the request requires at least v1, so **no value is returned**.
+3. Advance one step. The read is still waiting. Advance again: B applies v1 and the same pending read completes with **New name**.
+
+Both policies use the same follower and replication schedule. The difference is the condition for returning a value.
+
+## Carry the acknowledgment forward
+
+In this model, each acknowledged write records its version in the client's session. A session read carries that minimum to the selected follower. The follower can respond only when its applied version is at least the requested minimum. Waiting does not itself advance time or accelerate replication.
+
+Read-your-writes prevents this client from reading a state older than its own preceding acknowledged writes. It does not promise that every replica is current or that an exact old value is preserved forever. Later writes may replace that value. The displayed result records the version and leader state at completion; it remains historical after another write.
+
+## Break the fast path
+
+Reset, block follower B, write **New name**, and advance twice. A catches up; B stays at v0. An immediate read from B still returns **Hello**. A session read on B waits even though A could answer.
+
+Advance several more steps. Waiting cannot repair a blocked link. Restore B: the read still waits. Advance once more: overdue messages are applied and the read completes automatically. Alternatively, **Cancel waiting read**, choose A, and issue a new session read there. Cancellation returns no value and keeps the session minimum.
+
+</section>
+<section>
+
+## What did the guarantee cost?
+
+An immediate read favors a quick answer from the chosen follower, even if the answer predates your write. Requiring your write sacrifices that immediate answer when the follower is behind. Under a permanently blocked replication link, this model waits indefinitely; it never silently returns the old name as a successful session read.
+
+Real applications must choose a deadline and what happens next: report unavailability, retry elsewhere, or use another read route that can satisfy the requirement. This experiment provides explicit cancellation and manual rerouting after cancellation. It does not implement automatic fallback or a timeout. Reading a leader is another design option, with its own routing and failure assumptions.
+
+## Model boundaries
+
+- One sequential client, one string key, a permanent leader and two followers. All writes belong to this client; no concurrent clients or cross-session token transfer.
+- A write is acknowledged immediately at the leader and raises the session minimum. This is a visibility model, not proof of durable storage.
+- Versions increase for every accepted write, including identical values. Blank writes are rejected; values are trimmed and capped at 80 characters.
+- Replication uses the original deterministic model: messages are due after two logical steps, delivered FIFO per follower, and retained while a link is blocked. Only **Advance one step** moves time. This is a replication-link disruption, not a node outage or a complete network partition.
+- One pending read at a time. Its follower and minimum are fixed at request time. Writing and new reads are disabled until it completes or is canceled; replication controls remain available.
+- A session read completes on a step once the selected follower has applied the requested minimum. Restoring a link alone does not deliver messages. Immediate reads never wait for the session minimum.
+- No automatic timeout, failover, routing, elections, persistence, multi-key transactions or full causal consistency protocol. Reset/reload discards all state. Logical steps are not a latency benchmark.
+
+## Take it to a design discussion
+
+A save succeeds, but the selected read replica is disconnected from replication. Which is acceptable for your product: a previous profile name, a waiting indicator, an explicit failure, or a route to another replica? **Where does the minimum version live, how does it reach the next request, and what is the deadline?**
+
+## Sources and further reading
+
+This lesson, diagram and experiment are original. The minimum-version mechanism is an explanatory choice for this one-key model, not an implementation of a database protocol.
+
+For a product-specific example, MongoDB documents read-your-writes within causally consistent sessions using majority read and write concerns and sequential session operations. Those conditions and its other guarantees belong to MongoDB, not this simulator. See [Read Isolation, Consistency, and Recency](https://www.mongodb.com/docs/manual/core/read-isolation-consistency-recency/) and its session guarantees and limitations (reviewed 2026-10-26).
+
+</section>
+</div>

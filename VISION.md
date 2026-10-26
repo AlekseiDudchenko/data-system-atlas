@@ -21,7 +21,7 @@ The learning loop is: question → prediction → experiment → observation →
 7. Event-Driven Systems — delivery, replay, ordering, and stream state.
 8. Architecture Patterns — trade-offs across complete system boundaries.
 
-These are a long-term map. Only Replication and Stale Reads is available initially. The map must never imply an unfinished lesson works.
+These are a long-term map. Replication and Stale Reads and Read Your Writes are available. The map must never imply an unfinished lesson works.
 
 ## Principles
 

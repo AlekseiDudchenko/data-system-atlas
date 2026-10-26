@@ -2,7 +2,7 @@
 
 ## Static pages, local experiments
 
-Astro renders the home page and MDX lesson at build time. One React island hydrates the experiment using `client:load`. SVG presents topology; native HTML controls, node summaries, message lists, and a historical read status provide the usable interface and text equivalents. No server adapter, API, database, authentication, or persistent browser storage is introduced.
+Astro renders the home page and two MDX lessons at build time. Each lesson hydrates one React experiment using `client:load`. Shared SVG topology and full node values accompany native HTML controls and read feedback; the first experiment also presents message and event lists. No server adapter, API, database, authentication, or persistent browser storage is introduced.
 
 ## Boundaries
 
@@ -12,6 +12,9 @@ Astro renders the home page and MDX lesson at build time. One React island hydra
 | `src/layouts/Layout.astro`          | Static HTML document, metadata, navigation, skip link |
 | `src/components/ReplicationLab.tsx` | UI state, dispatch, SVG and HTML views                |
 | `src/simulation/replication.ts`     | Pure model and event transitions                      |
+| `src/simulation/session.ts`         | Sequential client minimum and pending-read contract   |
+| `src/components/SessionLab.tsx`     | Read-your-writes comparison and waiting/cancel UI      |
+| `src/components/ReplicationTopology.tsx` | Shared concrete SVG and full node values          |
 | `src/simulation/*.test.ts`          | Model contracts                                       |
 | `tests`                             | Production-build browser scenarios                    |
 | `public`                            | Static assets and Cloudflare headers                  |
@@ -26,7 +29,9 @@ All model state is typed readonly; transitions replace changed collections and d
 
 ## Content and extension
 
-Use MDX for a lesson with a single island imported explicitly. Content guidelines define a common editorial contract rather than a custom schema or registry. The home page names all eight territories but links only the working lesson. Extract shared simulation infrastructure or a content collection only after a second concrete use case demonstrates a need.
+Use MDX for a lesson with a single island imported explicitly. Content guidelines define a common editorial contract rather than a custom schema or registry. The home page names all eight territories and links the two working replication lessons. The second lesson reuses the existing replication transitions through a small session wrapper; it does not require a generic engine or content registry.
+
+The session wrapper records the last acknowledged write version for one client. An ordinary read returns immediately; a session read waits for the chosen follower to reach the captured minimum. Only delivery steps resolve pending reads. New writes/reads are rejected while waiting, enforcing sequential operations; cancellation retains the minimum, reset clears it, and completed results remain historical. See [ADR 0004](docs/adr/0004-session-minimum.md).
 
 ## Quality and operations
 
