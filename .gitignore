@@ -4,3 +4,6 @@ dist/
 playwright-report/
 test-results/
 .env*
+.idea/
+*.iml
+.DS_Store
