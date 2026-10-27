@@ -71,6 +71,7 @@ test("home navigation, keyboard workload controls and responsive counters", asyn
   await page
     .getByRole("link", { name: "Partitioning and Hotspots", exact: false })
     .click();
+  await expect(page.getByLabel("1 / Choose a workload")).toBeEnabled();
   await page.getByLabel("1 / Choose a workload").focus();
   await page.keyboard.press("h");
   await page.keyboard.press("Tab");

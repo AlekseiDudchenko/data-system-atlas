@@ -264,6 +264,12 @@ main {
   margin: 0;
   overflow-wrap: anywhere;
 }
+.lab-controls {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
 .controls-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

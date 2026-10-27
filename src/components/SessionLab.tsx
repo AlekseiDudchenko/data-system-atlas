@@ -1,9 +1,11 @@
+import { useHydrated } from "./useHydrated";
 import { useReducer, useState } from "react";
 import { FOLLOWERS, type Follower } from "../simulation/replication";
 import { initialSession, sessionTransition } from "../simulation/session";
 import ReplicationTopology from "./ReplicationTopology";
 
 export default function SessionLab() {
+  const hydrated = useHydrated();
   const [state, dispatch] = useReducer(
     sessionTransition,
     undefined,
@@ -29,105 +31,111 @@ export default function SessionLab() {
         <strong>v{state.minimumVersion}</strong>
       </p>
       <ReplicationTopology state={state.replication} />
-      <div className="controls-grid">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            dispatch({ type: "write", value });
-          }}
-        >
-          <label htmlFor="session-value">1 / Update your profile name</label>
-          <div className="inline">
-            <input
-              id="session-value"
-              required
-              maxLength={80}
-              value={value}
-              disabled={waiting}
-              onChange={(e) => setValue(e.target.value)}
-            />
-            <button type="submit" disabled={waiting || !value.trim()}>
-              Write name
-            </button>
-          </div>
-          <small>
-            Each acknowledged write raises your session minimum. One client, one
-            operation at a time.
-          </small>
-        </form>
-        <div>
-          <label htmlFor="session-follower">2 / Choose a follower</label>
-          <select
-            id="session-follower"
-            value={target}
-            disabled={waiting}
-            onChange={(e) => setTarget(e.target.value as Follower)}
-          >
-            <option value="A">Follower A</option>
-            <option value="B">Follower B</option>
-          </select>
-          <div className="inline session-actions">
-            <button
-              disabled={waiting}
-              onClick={() =>
-                dispatch({ type: "read", target, policy: "ordinary" })
-              }
-            >
-              Read immediately
-            </button>
-            <button
-              disabled={waiting}
-              onClick={() =>
-                dispatch({ type: "read", target, policy: "session" })
-              }
-            >
-              Read my writes
-            </button>
-          </div>
-          <small>
-            Immediate reads may be old. Session reads wait for at least your
-            last acknowledged write.
-          </small>
-        </div>
-      </div>
-      <div className="network">
-        <div>
-          <span className="control-label">3 / Disrupt replication</span>
-          <div className="inline">
-            {FOLLOWERS.map((id) => (
-              <label className="checkbox" key={id}>
-                <input
-                  type="checkbox"
-                  checked={state.replication.blocked[id]}
-                  onChange={(e) =>
-                    dispatch({
-                      type: "block",
-                      target: id,
-                      blocked: e.target.checked,
-                    })
-                  }
-                />
-                Block follower {id}
-              </label>
-            ))}
-          </div>
-        </div>
-        <div className="inline">
-          <button onClick={() => dispatch({ type: "step" })}>
-            Advance one step
-          </button>
-          <button
-            className="secondary"
-            onClick={() => {
-              dispatch({ type: "reset" });
-              setValue("New name");
-              setTarget("B");
+      <fieldset
+        className="lab-controls"
+        disabled={!hydrated}
+        aria-label="Experiment controls"
+      >
+        <div className="controls-grid">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              dispatch({ type: "write", value });
             }}
           >
-            Reset experiment
-          </button>
+            <label htmlFor="session-value">1 / Update your profile name</label>
+            <div className="inline">
+              <input
+                id="session-value"
+                required
+                maxLength={80}
+                value={value}
+                disabled={waiting}
+                onChange={(e) => setValue(e.target.value)}
+              />
+              <button type="submit" disabled={waiting || !value.trim()}>
+                Write name
+              </button>
+            </div>
+            <small>
+              Each acknowledged write raises your session minimum. One client,
+              one operation at a time.
+            </small>
+          </form>
+          <div>
+            <label htmlFor="session-follower">2 / Choose a follower</label>
+            <select
+              id="session-follower"
+              value={target}
+              disabled={waiting}
+              onChange={(e) => setTarget(e.target.value as Follower)}
+            >
+              <option value="A">Follower A</option>
+              <option value="B">Follower B</option>
+            </select>
+            <div className="inline session-actions">
+              <button
+                disabled={waiting}
+                onClick={() =>
+                  dispatch({ type: "read", target, policy: "ordinary" })
+                }
+              >
+                Read immediately
+              </button>
+              <button
+                disabled={waiting}
+                onClick={() =>
+                  dispatch({ type: "read", target, policy: "session" })
+                }
+              >
+                Read my writes
+              </button>
+            </div>
+            <small>
+              Immediate reads may be old. Session reads wait for at least your
+              last acknowledged write.
+            </small>
+          </div>
         </div>
-      </div>
+        <div className="network">
+          <div>
+            <span className="control-label">3 / Disrupt replication</span>
+            <div className="inline">
+              {FOLLOWERS.map((id) => (
+                <label className="checkbox" key={id}>
+                  <input
+                    type="checkbox"
+                    checked={state.replication.blocked[id]}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "block",
+                        target: id,
+                        blocked: e.target.checked,
+                      })
+                    }
+                  />
+                  Block follower {id}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="inline">
+            <button onClick={() => dispatch({ type: "step" })}>
+              Advance one step
+            </button>
+            <button
+              className="secondary"
+              onClick={() => {
+                dispatch({ type: "reset" });
+                setValue("New name");
+                setTarget("B");
+              }}
+            >
+              Reset experiment
+            </button>
+          </div>
+        </div>
+      </fieldset>
       <p
         className={`read-result ${waiting || (state.read?.status === "returned" && state.read.result.stale) ? "stale" : ""}`}
         role="status"

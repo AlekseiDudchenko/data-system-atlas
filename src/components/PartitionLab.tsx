@@ -1,3 +1,4 @@
+import { useHydrated } from "./useHydrated";
 import { useReducer } from "react";
 import {
   CAPACITY,
@@ -10,6 +11,7 @@ import {
 } from "../simulation/partitioning";
 
 export default function PartitionLab() {
+  const hydrated = useHydrated();
   const [state, dispatch] = useReducer(partitionTransition, undefined, () =>
     initialPartitioning(),
   );
@@ -33,67 +35,73 @@ export default function PartitionLab() {
         12 keys → 3 partitions. Routing: key modulo 3. Each partition completes
         up to {CAPACITY} equal-cost requests per step.
       </p>
-      <div className="controls-grid">
-        <div>
-          <label htmlFor="workload">1 / Choose a workload</label>
-          <select
-            id="workload"
-            value={state.workload}
-            onChange={(e) =>
-              dispatch({
-                type: "workload",
-                workload: e.target.value as Workload,
-              })
-            }
-          >
-            <option value="even">Even keys — one request per key</option>
-            <option value="hot">Hot key — nine requests to one key</option>
-          </select>
-          <small>
-            Changing workload or hot key starts a fresh run. The routing stays
-            fixed.
-          </small>
+      <fieldset
+        className="lab-controls"
+        disabled={!hydrated}
+        aria-label="Experiment controls"
+      >
+        <div className="controls-grid">
+          <div>
+            <label htmlFor="workload">1 / Choose a workload</label>
+            <select
+              id="workload"
+              value={state.workload}
+              onChange={(e) =>
+                dispatch({
+                  type: "workload",
+                  workload: e.target.value as Workload,
+                })
+              }
+            >
+              <option value="even">Even keys — one request per key</option>
+              <option value="hot">Hot key — nine requests to one key</option>
+            </select>
+            <small>
+              Changing workload or hot key starts a fresh run. The routing stays
+              fixed.
+            </small>
+          </div>
+          <div>
+            <label htmlFor="hot-key">2 / Choose the hot key</label>
+            <select
+              id="hot-key"
+              value={state.hotKey}
+              disabled={state.workload !== "hot"}
+              onChange={(e) =>
+                dispatch({ type: "hot-key", key: Number(e.target.value) })
+              }
+            >
+              {KEYS.map((key) => (
+                <option key={key} value={key}>
+                  Key {key} → P{owner(key)}
+                </option>
+              ))}
+            </select>
+            <small>
+              {state.workload === "hot"
+                ? `Each batch: 9 × key ${state.hotKey}, plus keys ${(state.hotKey + 1) % 12}, ${(state.hotKey + 2) % 12}, ${(state.hotKey + 3) % 12} once each.`
+                : "Each batch: keys 0 through 11, once each."}
+            </small>
+          </div>
         </div>
-        <div>
-          <label htmlFor="hot-key">2 / Choose the hot key</label>
-          <select
-            id="hot-key"
-            value={state.hotKey}
-            disabled={state.workload !== "hot"}
-            onChange={(e) =>
-              dispatch({ type: "hot-key", key: Number(e.target.value) })
-            }
+        <div className="inline partition-actions">
+          <button onClick={() => dispatch({ type: "batch" })}>
+            Send 12 requests + step
+          </button>
+          <button
+            className="secondary"
+            onClick={() => dispatch({ type: "drain" })}
           >
-            {KEYS.map((key) => (
-              <option key={key} value={key}>
-                Key {key} → P{owner(key)}
-              </option>
-            ))}
-          </select>
-          <small>
-            {state.workload === "hot"
-              ? `Each batch: 9 × key ${state.hotKey}, plus keys ${(state.hotKey + 1) % 12}, ${(state.hotKey + 2) % 12}, ${(state.hotKey + 3) % 12} once each.`
-              : "Each batch: keys 0 through 11, once each."}
-          </small>
+            Drain one step
+          </button>
+          <button
+            className="secondary"
+            onClick={() => dispatch({ type: "reset" })}
+          >
+            Reset run
+          </button>
         </div>
-      </div>
-      <div className="inline partition-actions">
-        <button onClick={() => dispatch({ type: "batch" })}>
-          Send 12 requests + step
-        </button>
-        <button
-          className="secondary"
-          onClick={() => dispatch({ type: "drain" })}
-        >
-          Drain one step
-        </button>
-        <button
-          className="secondary"
-          onClick={() => dispatch({ type: "reset" })}
-        >
-          Reset run
-        </button>
-      </div>
+      </fieldset>
       <p className="lab-hint">
         A batch arrives first, then every partition serves its own queue. Drain
         adds no requests. Reset clears counters and keeps your choices.

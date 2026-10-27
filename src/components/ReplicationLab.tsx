@@ -1,3 +1,4 @@
+import { useHydrated } from "./useHydrated";
 import ReplicationTopology from "./ReplicationTopology";
 import { useReducer, useState } from "react";
 import {
@@ -7,6 +8,7 @@ import {
   type Follower,
 } from "../simulation/replication";
 export default function ReplicationLab() {
+  const hydrated = useHydrated();
   const [state, dispatch] = useReducer(transition, undefined, initialState);
   const [value, setValue] = useState("Goodbye");
   const [target, setTarget] = useState<Follower>("A");
@@ -24,84 +26,90 @@ export default function ReplicationLab() {
         messages; only advancing time delivers them.
       </p>
       <ReplicationTopology state={state} />
-      <div className="controls-grid">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            dispatch({ type: "write", value });
-          }}
-        >
-          <label htmlFor="value">1 / Write to the leader</label>
-          <div className="inline">
-            <input
-              id="value"
-              value={value}
-              maxLength={80}
-              required
-              onChange={(e) => setValue(e.target.value)}
-            />
-            <button disabled={!value.trim()} type="submit">
-              Write value
-            </button>
-          </div>
-          <small>Accepted immediately. Replication takes two steps.</small>
-        </form>
-        <div>
-          <label htmlFor="follower">2 / Read a replica</label>
-          <div className="inline">
-            <select
-              id="follower"
-              value={target}
-              onChange={(e) => setTarget(e.target.value as Follower)}
-            >
-              <option value="A">Follower A</option>
-              <option value="B">Follower B</option>
-            </select>
-            <button onClick={() => dispatch({ type: "read", target })}>
-              Read follower
-            </button>
-          </div>
-          <small>A read does not advance time or deliver updates.</small>
-        </div>
-      </div>
-      <div className="network">
-        <div>
-          <span className="control-label">3 / Disrupt the network</span>
-          <div className="inline">
-            {FOLLOWERS.map((id) => (
-              <label className="checkbox" key={id}>
-                <input
-                  type="checkbox"
-                  checked={state.blocked[id]}
-                  onChange={(e) =>
-                    dispatch({
-                      type: "block",
-                      target: id,
-                      blocked: e.target.checked,
-                    })
-                  }
-                />
-                Block follower {id}
-              </label>
-            ))}
-          </div>
-        </div>
-        <div className="inline">
-          <button onClick={() => dispatch({ type: "step" })}>
-            Advance one step
-          </button>
-          <button
-            className="secondary"
-            onClick={() => {
-              dispatch({ type: "reset" });
-              setValue("Goodbye");
-              setTarget("A");
+      <fieldset
+        className="lab-controls"
+        disabled={!hydrated}
+        aria-label="Experiment controls"
+      >
+        <div className="controls-grid">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              dispatch({ type: "write", value });
             }}
           >
-            Reset experiment
-          </button>
+            <label htmlFor="value">1 / Write to the leader</label>
+            <div className="inline">
+              <input
+                id="value"
+                value={value}
+                maxLength={80}
+                required
+                onChange={(e) => setValue(e.target.value)}
+              />
+              <button disabled={!value.trim()} type="submit">
+                Write value
+              </button>
+            </div>
+            <small>Accepted immediately. Replication takes two steps.</small>
+          </form>
+          <div>
+            <label htmlFor="follower">2 / Read a replica</label>
+            <div className="inline">
+              <select
+                id="follower"
+                value={target}
+                onChange={(e) => setTarget(e.target.value as Follower)}
+              >
+                <option value="A">Follower A</option>
+                <option value="B">Follower B</option>
+              </select>
+              <button onClick={() => dispatch({ type: "read", target })}>
+                Read follower
+              </button>
+            </div>
+            <small>A read does not advance time or deliver updates.</small>
+          </div>
         </div>
-      </div>
+        <div className="network">
+          <div>
+            <span className="control-label">3 / Disrupt the network</span>
+            <div className="inline">
+              {FOLLOWERS.map((id) => (
+                <label className="checkbox" key={id}>
+                  <input
+                    type="checkbox"
+                    checked={state.blocked[id]}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "block",
+                        target: id,
+                        blocked: e.target.checked,
+                      })
+                    }
+                  />
+                  Block follower {id}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="inline">
+            <button onClick={() => dispatch({ type: "step" })}>
+              Advance one step
+            </button>
+            <button
+              className="secondary"
+              onClick={() => {
+                dispatch({ type: "reset" });
+                setValue("Goodbye");
+                setTarget("A");
+              }}
+            >
+              Reset experiment
+            </button>
+          </div>
+        </div>
+      </fieldset>
       <p
         className={`read-result ${state.lastRead?.stale ? "stale" : ""}`}
         role="status"
