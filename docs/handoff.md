@@ -12,7 +12,7 @@ Latest local verification on 2026-10-27 passed typecheck (zero errors, warnings 
 
 ## Remaining work
 
-- [ ] Cloudflare Pages deployment and production verification (#13): record actual HTTPS URL and deployed SHA, verify all routes and lesson interactions, security headers and rollback. No verified public deployment is recorded.
+- [x] Cloudflare Pages publication (#13): https://data-systems-atlas.dudchenko.org/ and https://data-systems-atlas-4c2.pages.dev/. GitHub main deploys automatically. Application `b120f77` passed all 26 production browser tests after a hydration readiness fix; Node 24 is pinned. See [production verification](production-validation.md) for SHA, deployment ID, headers and rollback limitations.
 - [ ] Gather qualitative learner feedback on the three lessons, then define the next bounded experiment. Later topics in the [roadmap](roadmap.md) are discovery areas, not scheduled implementation tickets.
 - [ ] Restore GitHub Actions when account availability is resolved (#16). This is non-blocking; local validation remains the development and merge route.
 

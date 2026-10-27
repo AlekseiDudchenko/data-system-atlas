@@ -1,5 +1,9 @@
 # Cloudflare Pages deployment
 
+## Live project — 2026-10-27
+
+Project `data-systems-atlas` is connected to the existing GitHub repository and deploys `main` automatically. Primary URL: https://data-systems-atlas.dudchenko.org/. Assigned Pages URL: https://data-systems-atlas-4c2.pages.dev/. The custom domain is Active with SSL enabled. Node 24 is pinned in `.node-version`. See [production release verification](production-validation.md) for the deployed application SHA, deployment ID, checks and rollback limits.
+
 ## Settings
 
 Connect the existing `AlekseiDudchenko/data-system-atlas` repository to Cloudflare Pages. Product/project name: `data-systems-atlas` if available. Production branch: `main`. Root directory: repository root. Framework preset: Astro. Build command: `npm ci && npm run build`. Build output directory: `dist`. Set `NODE_VERSION=24`. No runtime adapter, database, environment secrets, or Cloudflare Functions are required. `wrangler.jsonc` describes the static output for optional CLI deployment.
@@ -18,8 +22,8 @@ Verify `/partitioning/hotspots` directly and after hard refresh. An even batch c
 
 Rollback using Cloudflare Pages' prior production deployment promotion, or revert the source commit through a reviewed PR and rebuild. Test the same smoke scenario after rollback.
 
-## Bootstrap deployment status
+## Historical bootstrap deployment status
 
-Not deployed by the bootstrap session unless an actual verified URL is recorded in `docs/validation.md`. No Cloudflare account connection or deployment credentials were supplied. The application is ready for static Pages hosting; account authorization and repository connection remain required.
+The bootstrap session did not deploy the site because account access was unavailable. This is superseded by the live project and production verification above.
 
 References: [Cloudflare build settings](https://developers.cloudflare.com/pages/configuration/build-configuration/) and [Astro deployment](https://docs.astro.build/en/guides/deploy/).

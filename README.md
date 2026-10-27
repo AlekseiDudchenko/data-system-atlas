@@ -6,6 +6,8 @@ An independent, open-source interactive atlas of data-intensive applications and
 
 ## Try the first experiment
 
+Live site: [Data Systems Atlas](https://data-systems-atlas.dudchenko.org/).
+
 Open `/replication/stale-reads`. Write a value, read a follower before delivery, block a replication link, and advance logical time to watch the system catch up. No sign-in, backend, or database is needed. Explanations are available without JavaScript; experiments require it.
 
 Then open `/replication/read-your-writes`. Compare an immediate follower read with a session read that waits for your last acknowledged write. Block replication to see the availability cost, then restore it or cancel and retry on another follower.
