@@ -10,6 +10,8 @@ Open `/replication/stale-reads`. Write a value, read a follower before delivery,
 
 Then open `/replication/read-your-writes`. Compare an immediate follower read with a session read that waits for your last acknowledged write. Block replication to see the availability cost, then restore it or cancel and retry on another follower.
 
+Explore `/partitioning/hotspots` to compare even and hot-key request batches across three fixed owners. See how equal key counts can still produce one growing queue while other owners have unused capacity.
+
 ## Development
 
 Use Node.js 24 LTS and npm. The committed lockfile pins the compatible dependency graph.

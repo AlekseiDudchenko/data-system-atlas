@@ -28,7 +28,7 @@ const topics = [
       Start with replication <span aria-hidden="true">↗</span>
     </a>
     <span class="meta">
-      02 interactive lessons · Built for curious engineers
+      03 interactive lessons · Built for curious engineers
     </span>
   </section>
   <section id="atlas" class="atlas-section">
@@ -38,9 +38,9 @@ const topics = [
     </div>
     <div class="atlas-grid">
       {topics.map((topic, i) => (
-        <article class:list={["topic", { available: i === 2 }]}>
+        <article class:list={["topic", { available: i === 2 || i === 3 }]}>
           <span class="eyebrow">
-            0{i + 1} / {i === 2 ? "EXPLORE NOW" : "ON THE HORIZON"}
+            0{i + 1} / {i === 2 || i === 3 ? "EXPLORE NOW" : "ON THE HORIZON"}
           </span>
           <h3>{topic}</h3>
           {i === 2 ? (
@@ -52,6 +52,11 @@ const topics = [
                 Replication and Stale Reads →
               </a>
               <a href="/replication/read-your-writes">Read Your Writes →</a>
+            </>
+          ) : i === 3 ? (
+            <>
+              <p>Evenly placed keys can still produce uneven traffic.</p>
+              <a href="/partitioning/hotspots">Partitioning and Hotspots →</a>
             </>
           ) : (
             <p>Planned territory</p>

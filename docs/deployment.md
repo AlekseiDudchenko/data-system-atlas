@@ -14,6 +14,8 @@ Verify the returned URL serves `/`, `/replication/stale-reads`, and `/favicon.sv
 
 Also verify `/replication/read-your-writes` by direct navigation and hard refresh. Block B, write, compare immediate and session reads, advance twice, confirm the session read remains waiting, then restore and step to complete it. Verify canceling a waiting read retains the session minimum before retrying on A.
 
+Verify `/partitioning/hotspots` directly and after hard refresh. An even batch completes all twelve requests; a fresh hot-key batch produces 10/1/1 arrivals and six queued requests on one owner. Drain twice to empty that queue. Change hot key to move the busiest owner and verify changing choices resets counters.
+
 Rollback using Cloudflare Pages' prior production deployment promotion, or revert the source commit through a reviewed PR and rebuild. Test the same smoke scenario after rollback.
 
 ## Bootstrap deployment status
