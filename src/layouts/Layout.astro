@@ -1,5 +1,15 @@
 ---
 import "../styles/global.css";
+import {
+  localeFromPath,
+  localizedPath,
+  locales,
+  languageNames,
+  translator,
+} from "../i18n";
+const locale = localeFromPath(Astro.url.pathname);
+const t = translator(locale);
+const canonical = new URL(Astro.url.pathname, Astro.site);
 interface Props {
   title?: string;
   frontmatter?: { title: string; description?: string };
@@ -10,42 +20,69 @@ const title =
 const description =
   Astro.props.description ??
   Astro.props.frontmatter?.description ??
-  "Explore, break, and understand data systems through original interactive experiments.";
+  t(
+    "Explore, break, and understand data systems through original interactive experiments.",
+  );
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={locale}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <title>{title} · Data Systems Atlas</title>
+    <link rel="canonical" href={canonical} />
+    {locales.map((language) => (
+      <link
+        rel="alternate"
+        hreflang={language}
+        href={new URL(localizedPath(language, Astro.url.pathname), Astro.site)}
+      />
+    ))}
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={new URL(localizedPath("en", Astro.url.pathname), Astro.site)}
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
     <a class="skip" href="#main">
-      Skip to content
+      {t("Skip to content")}
     </a>
     <header class="site-header">
-      <a class="brand" href="/">
+      <a class="brand" href={localizedPath(locale)}>
         <span class="brand-icon" aria-hidden="true">
           ◈
         </span>{" "}
         Data Systems Atlas
       </a>
-      <nav aria-label="Main">
-        <a href="/#atlas">Explore the atlas</a>
+      <nav class="main-nav" aria-label={t("Main")}>
+        <a href={`${localizedPath(locale)}#atlas`}>{t("Explore the atlas")}</a>
         <a href="https://github.com/AlekseiDudchenko/data-system-atlas">
           GitHub ↗
         </a>
+      </nav>
+      <nav class="language-switcher" aria-label={t("Language")}>
+        {locales.map((language) => (
+          <a
+            href={localizedPath(language, Astro.url.pathname)}
+            lang={language}
+            hreflang={language}
+            aria-current={language === locale ? "page" : undefined}
+          >
+            {languageNames[language]}
+          </a>
+        ))}
       </nav>
     </header>
     <main id="main" tabindex="-1">
       <slot />
     </main>
     <footer>
-      <span>Data Systems Atlas · Explore. Break. Understand.</span>
-      <span>An independent, open-source learning project.</span>
+      <span>Data Systems Atlas · {t("Explore. Break. Understand.")}</span>
+      <span>{t("An independent, open-source learning project.")}</span>
     </footer>
   </body>
 </html>

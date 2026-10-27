@@ -1,3 +1,5 @@
+import { formatLog } from "../i18n/log";
+import { translator, type Locale } from "../i18n";
 import { useHydrated } from "./useHydrated";
 import ReplicationTopology from "./ReplicationTopology";
 import { useReducer, useState } from "react";
@@ -7,7 +9,8 @@ import {
   transition,
   type Follower,
 } from "../simulation/replication";
-export default function ReplicationLab() {
+export default function ReplicationLab({ locale = "en" }: { locale?: Locale }) {
+  const t = translator(locale);
   const hydrated = useHydrated();
   const [state, dispatch] = useReducer(transition, undefined, initialState);
   const [value, setValue] = useState("Goodbye");
@@ -16,20 +19,24 @@ export default function ReplicationLab() {
     <section className="lab" aria-labelledby="lab-title">
       <div className="lab-heading">
         <div>
-          <span className="eyebrow">LIVE EXPERIMENT / 01</span>
-          <h2 id="lab-title">One write. Three perspectives.</h2>
+          <span className="eyebrow">{t("LIVE EXPERIMENT / 01")}</span>
+          <h2 id="lab-title">{t("One write. Three perspectives.")}</h2>
         </div>
-        <span className="step">Step {state.step}</span>
+        <span className="step">
+          {t("Step") + " "}
+          {state.step}
+        </span>
       </div>
       <p className="lab-hint">
-        Write → read a follower → advance twice → read again. A write queues two
-        messages; only advancing time delivers them.
+        {t(
+          "Write → read a follower → advance twice → read again. A write queues two messages; only advancing time delivers them.",
+        )}
       </p>
-      <ReplicationTopology state={state} />
+      <ReplicationTopology locale={locale} state={state} />
       <fieldset
         className="lab-controls"
         disabled={!hydrated}
-        aria-label="Experiment controls"
+        aria-label={t("Experiment controls")}
       >
         <div className="controls-grid">
           <form
@@ -38,7 +45,7 @@ export default function ReplicationLab() {
               dispatch({ type: "write", value });
             }}
           >
-            <label htmlFor="value">1 / Write to the leader</label>
+            <label htmlFor="value">{t("1 / Write to the leader")}</label>
             <div className="inline">
               <input
                 id="value"
@@ -48,32 +55,38 @@ export default function ReplicationLab() {
                 onChange={(e) => setValue(e.target.value)}
               />
               <button disabled={!value.trim()} type="submit">
-                Write value
+                {t("Write value")}
               </button>
             </div>
-            <small>Accepted immediately. Replication takes two steps.</small>
+            <small>
+              {t("Accepted immediately. Replication takes two steps.")}
+            </small>
           </form>
           <div>
-            <label htmlFor="follower">2 / Read a replica</label>
+            <label htmlFor="follower">{t("2 / Read a replica")}</label>
             <div className="inline">
               <select
                 id="follower"
                 value={target}
                 onChange={(e) => setTarget(e.target.value as Follower)}
               >
-                <option value="A">Follower A</option>
-                <option value="B">Follower B</option>
+                <option value="A">{t("Follower A")}</option>
+                <option value="B">{t("Follower B")}</option>
               </select>
               <button onClick={() => dispatch({ type: "read", target })}>
-                Read follower
+                {t("Read follower")}
               </button>
             </div>
-            <small>A read does not advance time or deliver updates.</small>
+            <small>
+              {t("A read does not advance time or deliver updates.")}
+            </small>
           </div>
         </div>
         <div className="network">
           <div>
-            <span className="control-label">3 / Disrupt the network</span>
+            <span className="control-label">
+              {t("3 / Disrupt the network")}
+            </span>
             <div className="inline">
               {FOLLOWERS.map((id) => (
                 <label className="checkbox" key={id}>
@@ -88,14 +101,15 @@ export default function ReplicationLab() {
                       })
                     }
                   />
-                  Block follower {id}
+                  {t("Block follower") + " "}
+                  {id}
                 </label>
               ))}
             </div>
           </div>
           <div className="inline">
             <button onClick={() => dispatch({ type: "step" })}>
-              Advance one step
+              {t("Advance one step")}
             </button>
             <button
               className="secondary"
@@ -105,7 +119,7 @@ export default function ReplicationLab() {
                 setTarget("A");
               }}
             >
-              Reset experiment
+              {t("Reset experiment")}
             </button>
           </div>
         </div>
@@ -116,40 +130,55 @@ export default function ReplicationLab() {
         aria-live="polite"
       >
         {state.lastRead
-          ? `Last read: Follower ${state.lastRead.target} returned “${state.lastRead.value}” (v${state.lastRead.version}). ${state.lastRead.stale ? "Stale read" : "Current read"} — leader was v${state.lastRead.leaderVersion} at read time.`
-          : "No read yet. Predict the result, then read a follower."}
+          ? t(
+              "Last read: Follower {0} returned “{1}” (v{2}). {3} — leader was v{4} at read time.",
+              state.lastRead.target,
+              state.lastRead.value,
+              state.lastRead.version,
+              state.lastRead.stale ? t("Stale read") : t("Current read"),
+              state.lastRead.leaderVersion,
+            )
+          : t("No read yet. Predict the result, then read a follower.")}
       </p>
       <div className="observations">
         <section aria-labelledby="queue-title">
           <h3 id="queue-title">
-            In transit <span className="badge">{state.queue.length}</span>
+            {t("In transit") + " "}
+            <span className="badge">{state.queue.length}</span>
           </h3>
-          <p className="muted">FIFO per follower · delivery after two steps</p>
+          <p className="muted">
+            {t("FIFO per follower · delivery after two steps")}
+          </p>
           {state.queue.length ? (
             <ul className="messages" tabIndex={0} aria-labelledby="queue-title">
               {state.queue.map((m) => (
                 <li key={`${m.target}-${m.version}`}>
-                  <strong>Leader → {m.target}</strong>
+                  <strong>
+                    {t("Leader →") + " "}
+                    {m.target}
+                  </strong>
                   <span>
-                    “{m.value}” · v{m.version}
+                    “{m.value}
+                    {t("” · v")}
+                    {m.version}
                   </span>
                   <small>
                     {state.blocked[m.target]
-                      ? "Blocked · retained"
+                      ? t("Blocked · retained")
                       : m.due <= state.step
-                        ? "Ready next step"
-                        : `Due at step ${m.due}`}
+                        ? t("Ready next step")
+                        : t("Due at step {0}", m.due)}
                   </small>
                 </li>
               ))}
             </ul>
           ) : (
-            <p>No pending messages.</p>
+            <p>{t("No pending messages.")}</p>
           )}
         </section>
         <section aria-labelledby="log-title">
-          <h3 id="log-title">Event log</h3>
-          <p className="muted">Most recent first · last 100 events</p>
+          <h3 id="log-title">{t("Event log")}</h3>
+          <p className="muted">{t("Most recent first · last 100 events")}</p>
           <ol
             className="event-log"
             reversed
@@ -157,7 +186,9 @@ export default function ReplicationLab() {
             aria-labelledby="log-title"
           >
             {[...state.log].reverse().map((entry, i) => (
-              <li key={`${state.log.length - i}-${entry}`}>{entry}</li>
+              <li key={`${state.log.length - i}-${entry.step}`}>
+                {formatLog(entry, locale)}
+              </li>
             ))}
           </ol>
         </section>

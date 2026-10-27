@@ -1,3 +1,4 @@
+import { translator, type Locale } from "../i18n";
 import { useHydrated } from "./useHydrated";
 import { useReducer } from "react";
 import {
@@ -10,7 +11,8 @@ import {
   type Workload,
 } from "../simulation/partitioning";
 
-export default function PartitionLab() {
+export default function PartitionLab({ locale = "en" }: { locale?: Locale }) {
+  const t = translator(locale);
   const hydrated = useHydrated();
   const [state, dispatch] = useReducer(partitionTransition, undefined, () =>
     initialPartitioning(),
@@ -20,29 +22,44 @@ export default function PartitionLab() {
   const peak = Math.max(...state.loads.map((load) => load.received));
   const summary =
     state.step === 0
-      ? "No requests yet. Predict the distribution, then send a batch."
-      : `Step ${state.step}: ${total} requests received, ${total - pending} completed, ${pending} queued. Busiest partition received ${total ? Math.round((100 * peak) / total) : 0}% of requests so far.`;
+      ? t("No requests yet. Predict the distribution, then send a batch.")
+      : t(
+          "Step {0}: {1} requests received, {2} completed, {3} queued. Busiest partition received {4}% of requests so far.",
+          state.step,
+          total,
+          total - pending,
+          pending,
+          total ? Math.round((100 * peak) / total) : 0,
+        );
   return (
     <section className="lab" aria-labelledby="partition-lab-title">
       <div className="lab-heading">
         <div>
-          <span className="eyebrow">LIVE EXPERIMENT / 03</span>
-          <h2 id="partition-lab-title">Same keys. Different pressure.</h2>
+          <span className="eyebrow">{t("LIVE EXPERIMENT / 03")}</span>
+          <h2 id="partition-lab-title">
+            {t("Same keys. Different pressure.")}
+          </h2>
         </div>
-        <span className="step">Step {state.step}</span>
+        <span className="step">
+          {t("Step") + " "}
+          {state.step}
+        </span>
       </div>
       <p className="lab-hint">
-        12 keys → 3 partitions. Routing: key modulo 3. Each partition completes
-        up to {CAPACITY} equal-cost requests per step.
+        {t(
+          "12 keys → 3 partitions. Routing: key modulo 3. Each partition completes up to",
+        ) + " "}
+        {CAPACITY}
+        {" " + t("equal-cost requests per step.")}
       </p>
       <fieldset
         className="lab-controls"
         disabled={!hydrated}
-        aria-label="Experiment controls"
+        aria-label={t("Experiment controls")}
       >
         <div className="controls-grid">
           <div>
-            <label htmlFor="workload">1 / Choose a workload</label>
+            <label htmlFor="workload">{t("1 / Choose a workload")}</label>
             <select
               id="workload"
               value={state.workload}
@@ -53,16 +70,21 @@ export default function PartitionLab() {
                 })
               }
             >
-              <option value="even">Even keys — one request per key</option>
-              <option value="hot">Hot key — nine requests to one key</option>
+              <option value="even">
+                {t("Even keys — one request per key")}
+              </option>
+              <option value="hot">
+                {t("Hot key — nine requests to one key")}
+              </option>
             </select>
             <small>
-              Changing workload or hot key starts a fresh run. The routing stays
-              fixed.
+              {t(
+                "Changing workload or hot key starts a fresh run. The routing stays fixed.",
+              )}
             </small>
           </div>
           <div>
-            <label htmlFor="hot-key">2 / Choose the hot key</label>
+            <label htmlFor="hot-key">{t("2 / Choose the hot key")}</label>
             <select
               id="hot-key"
               value={state.hotKey}
@@ -73,52 +95,67 @@ export default function PartitionLab() {
             >
               {KEYS.map((key) => (
                 <option key={key} value={key}>
-                  Key {key} → P{owner(key)}
+                  {t("Key") + " "}
+                  {key}
+                  {" " + t("→ P")}
+                  {owner(key)}
                 </option>
               ))}
             </select>
             <small>
               {state.workload === "hot"
-                ? `Each batch: 9 × key ${state.hotKey}, plus keys ${(state.hotKey + 1) % 12}, ${(state.hotKey + 2) % 12}, ${(state.hotKey + 3) % 12} once each.`
-                : "Each batch: keys 0 through 11, once each."}
+                ? t(
+                    "Each batch: 9 × key {0}, plus keys {1}, {2}, {3} once each.",
+                    state.hotKey,
+                    (state.hotKey + 1) % 12,
+                    (state.hotKey + 2) % 12,
+                    (state.hotKey + 3) % 12,
+                  )
+                : t("Each batch: keys 0 through 11, once each.")}
             </small>
           </div>
         </div>
         <div className="inline partition-actions">
           <button onClick={() => dispatch({ type: "batch" })}>
-            Send 12 requests + step
+            {t("Send 12 requests + step")}
           </button>
           <button
             className="secondary"
             onClick={() => dispatch({ type: "drain" })}
           >
-            Drain one step
+            {t("Drain one step")}
           </button>
           <button
             className="secondary"
             onClick={() => dispatch({ type: "reset" })}
           >
-            Reset run
+            {t("Reset run")}
           </button>
         </div>
       </fieldset>
       <p className="lab-hint">
-        A batch arrives first, then every partition serves its own queue. Drain
-        adds no requests. Reset clears counters and keeps your choices.
+        {t(
+          "A batch arrives first, then every partition serves its own queue. Drain adds no requests. Reset clears counters and keeps your choices.",
+        )}
       </p>
       <svg
         className="partition-chart"
         viewBox="0 0 780 255"
         role="img"
         aria-label={state.loads
-          .map(
-            (load, id) =>
-              `P${id}: ${load.received} received, ${load.completed} completed, ${load.queued} queued`,
+          .map((load, id) =>
+            t(
+              "P{0}: {1} received, {2} completed, {3} queued",
+              id,
+              load.received,
+              load.completed,
+              load.queued,
+            ),
           )
           .join(". ")}
       >
         <text x="10" y="22" fill="currentColor">
-          Share of all requests received · fixed 0–100% scale
+          {t("Share of all requests received · fixed 0–100% scale")}
         </text>
         {PARTITIONS.map((id) => {
           const load = state.loads[id]!;
@@ -145,7 +182,8 @@ export default function PartitionLab() {
                 fill={load.queued ? "#a25b13" : "#178176"}
               />
               <text x="590" y={63 + 70 * id} fill="currentColor">
-                {Math.round(share * 100)}% · {load.queued} queued
+                {Math.round(share * 100)}% · {load.queued}
+                {" " + t("queued")}
               </text>
             </g>
           );
@@ -160,14 +198,14 @@ export default function PartitionLab() {
       </p>
       <div className="partition-table-wrap">
         <table className="partition-table">
-          <caption>Exact counters and fixed key ownership</caption>
+          <caption>{t("Exact counters and fixed key ownership")}</caption>
           <thead>
             <tr>
-              <th scope="col">Partition / keys</th>
-              <th scope="col">Last step arrivals</th>
-              <th scope="col">Received total</th>
-              <th scope="col">Completed total</th>
-              <th scope="col">Queued now</th>
+              <th scope="col">{t("Partition / keys")}</th>
+              <th scope="col">{t("Last step arrivals")}</th>
+              <th scope="col">{t("Received total")}</th>
+              <th scope="col">{t("Completed total")}</th>
+              <th scope="col">{t("Queued now")}</th>
             </tr>
           </thead>
           <tbody>
@@ -176,7 +214,8 @@ export default function PartitionLab() {
                 <th scope="row">
                   P{id}
                   <span className="partition-keys">
-                    Keys {KEYS.filter((key) => owner(key) === id).join(", ")}
+                    {t("Keys") + " "}
+                    {KEYS.filter((key) => owner(key) === id).join(", ")}
                   </span>
                 </th>
                 <td>{state.lastArrivals[id]}</td>
@@ -189,9 +228,9 @@ export default function PartitionLab() {
         </table>
       </div>
       <p className="lab-hint">
-        The keys stay evenly placed: four per partition. Traffic can still be
-        skewed. Queued work stays on its owner; spare capacity elsewhere is not
-        borrowed.
+        {t(
+          "The keys stay evenly placed: four per partition. Traffic can still be skewed. Queued work stays on its owner; spare capacity elsewhere is not borrowed.",
+        )}
       </p>
     </section>
   );

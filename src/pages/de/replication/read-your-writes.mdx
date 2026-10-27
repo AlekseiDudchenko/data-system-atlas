@@ -1,0 +1,102 @@
+---
+layout: ../../../layouts/Layout.astro
+title: Eigene Schreibvorgänge lesen
+description: Vergleichen Sie sofortiges Lesen mit einem Sitzungslesen, das auf Ihre letzte bestätigte Schreibversion wartet, und untersuchen Sie den Preis für die Verfügbarkeit.
+---
+
+import LessonHero from "../../../components/LessonHero.astro";
+import SessionLab from "../../../components/SessionLab";
+
+<LessonHero
+  title="Eigene"
+  subtitle="Schreibvorgänge lesen"
+  experiment="02"
+  description="Sie speichern einen neuen Profilnamen, sehen eine Erfolgsmeldung und laden neu — der alte Name ist zurück. Wie kann auf erfolgreiches Speichern ein veralteter Lesewert folgen?"
+  tags={["Sitzungsgarantien", "Mindestversion", "Warten und Verfügbarkeit"]}
+/>
+
+<div className="prose-grid">
+<section>
+
+## Warum kann der alte Name zurückkommen?
+
+Eine Anwendung kann mehrere Datenkopien halten, damit mehr als ein Rechner Lesezugriffe bedient. Im System unten gehen Schreibvorgänge an eine primäre Kopie, den **Leader**. Zwei weitere Kopien, **Replikate A und B**, erhalten diese Änderungen durch Replikation. Einen späteren Lesezugriff kann die Anwendung an jedes Replikat senden.
+
+Hier ist die Replikation asynchron: Der Leader bestätigt das Speichern, bevor die Replikate die Änderung angewendet haben. Liest Ihre Profilseite von einem zurückliegenden Replikat, zeigt sie den alten Namen. Ihr Schreibvorgang war beim Leader erfolgreich; die lesende Kopie hat noch nicht aufgeholt.
+
+Die technische Frage lautet: **Wie berücksichtigt die nächste Anfrage das Speichern, das gerade als erfolgreich bestätigt wurde?**
+
+</section>
+<section>
+
+## Was verspricht „read your writes“?
+
+Nach einem bestätigten Schreibvorgang müssen Ihre nachfolgenden Lesevorgänge einen Zustand liefern, der diesen Schreibvorgang oder ein späteres Update enthält. Das ist eine **Sitzungsgarantie**: Sie verbindet Ihre eigenen Operationen. Sie verlangt nicht, dass jedes Replikat für jeden Nutzer aktuell ist.
+
+Dieses Experiment stellt die Sitzung als gespeicherte Mindestversion dar. Wurde Ihr Speichern als **v1** bestätigt, verlangt Ihr nächstes Sitzungslesen **v1 oder neuer**. Ein Replikat bei **v0** kann die Anfrage noch nicht erfüllen. Die Version ist eine Sequenznummer, keine Zeit in Millisekunden.
+
+Vergleichen Sie sofortiges Lesen mit einem Lesevorgang, der Ihre Schreibversion verlangt. **Zuerst vorhersagen:** Soll ein zurückliegendes Replikat den alten Namen liefern, warten oder die Anfrage weiterleiten? Blockieren Sie dann seine Replikation, um die Kosten des Wartens zu entdecken. Nur **Einen Schritt weiter** bewegt die Simulationszeit; Updates kommen normalerweise nach zwei Schritten an.
+
+</section>
+</div>
+
+<SessionLab locale="de" client:load />
+
+<div className="prose-grid">
+<section>
+
+## Den nächsten Bildschirm vorhersagen
+
+Beginnen Sie mit [Replikation und veraltete Lesewerte](/de/replication/stale-reads), falls Replikationsverzögerung neu für Sie ist. Hier sind **Sie** der einzige Client. Alle Replikate starten mit **Hello** bei v0.
+
+Schreiben Sie **New name**. Der Leader bestätigt v1, und Ihre Sitzung merkt sich mindestens v1. Was sollte jede Lesestrategie tun, bevor Sie die Zeit vorwärts bewegen?
+
+1. Wählen Sie Replikat B und drücken Sie **Sofort lesen**. Es liefert **Hello**, v0. Die Anfrage verlangte kein Minimum über v0.
+2. Drücken Sie **Eigene Schreibversion lesen**. B hat v0, aber die Anfrage erfordert mindestens v1. Deshalb wird **kein Wert zurückgegeben**.
+3. Gehen Sie einen Schritt weiter. Der Lesevorgang wartet noch. Ein weiterer Schritt: B wendet v1 an, und derselbe wartende Lesevorgang endet mit **New name**.
+
+Beide Strategien verwenden dasselbe Replikat und denselben Replikationsplan. Der Unterschied ist die Bedingung für die Rückgabe eines Werts.
+
+## Die Bestätigung weitertragen
+
+In diesem Modell speichert jeder bestätigte Schreibvorgang seine Version in der Sitzung des Clients. Ein Sitzungslesen übermittelt dieses Minimum an das gewählte Replikat. Es kann erst antworten, wenn seine angewendete Version mindestens dem angeforderten Minimum entspricht. Warten bewegt die Zeit nicht weiter und beschleunigt die Replikation nicht.
+
+Read-your-writes verhindert, dass dieser Client einen Zustand liest, der älter ist als seine eigenen vorangegangenen bestätigten Schreibvorgänge. Es verspricht weder, dass jedes Replikat aktuell ist, noch, dass ein bestimmter alter Wert ewig erhalten bleibt. Spätere Schreibvorgänge können ihn ersetzen. Das angezeigte Ergebnis hält Version und Leaderzustand beim Abschluss fest; nach weiteren Schreibvorgängen bleibt es historisch.
+
+## Den schnellen Pfad unterbrechen
+
+Zurücksetzen, B blockieren, **New name** schreiben und zwei Schritte weitergehen. A holt auf; B bleibt bei v0. Sofortiges Lesen von B liefert weiterhin **Hello**. Ein Sitzungslesen auf B wartet, obwohl A antworten könnte.
+
+Gehen Sie weitere Schritte. Warten repariert keine blockierte Verbindung. Stellen Sie B wieder her: Der Lesevorgang wartet weiterhin. Ein weiterer Schritt wendet überfällige Nachrichten an und beendet ihn automatisch. Alternativ: **Wartenden Lesevorgang abbrechen**, A wählen und dort ein neues Sitzungslesen starten. Abbrechen gibt keinen Wert zurück und behält das Sitzungsminimum.
+
+</section>
+<section>
+
+## Was kostet die Garantie?
+
+Sofortiges Lesen bevorzugt eine schnelle Antwort vom gewählten Replikat, auch wenn sie älter ist als Ihr Schreibvorgang. Die eigene Schreibversion zu verlangen kostet diese sofortige Antwort, wenn das Replikat zurückliegt. Bei dauerhaft blockierter Replikationsverbindung wartet dieses Modell unbegrenzt; es gibt den alten Namen niemals stillschweigend als erfolgreiches Sitzungslesen zurück.
+
+Reale Anwendungen müssen eine Frist und das weitere Vorgehen wählen: Nichtverfügbarkeit melden, anderswo erneut versuchen oder einen anderen Leseweg nutzen, der die Anforderung erfüllt. Dieses Experiment bietet explizites Abbrechen und danach manuelle Umleitung. Es implementiert weder automatischen Fallback noch Timeout. Lesen beim Leader ist eine weitere Option mit eigenen Routing- und Fehlerannahmen.
+
+## Grenzen des Modells
+
+- Ein sequenzieller Client, ein Stringschlüssel, ein dauerhafter Leader und zwei Replikate. Alle Schreibvorgänge gehören diesem Client; keine parallelen Clients und kein Tokenaustausch zwischen Sitzungen.
+- Schreiben wird beim Leader sofort bestätigt und erhöht das Sitzungsminimum. Dies ist ein Sichtbarkeitsmodell, kein Nachweis dauerhafter Speicherung.
+- Versionen steigen bei jedem akzeptierten Schreibvorgang, auch bei identischen Werten. Leere Werte werden abgelehnt; Rand-Leerzeichen entfernt und Werte auf 80 Zeichen begrenzt.
+- Die Replikation nutzt das ursprüngliche deterministische Modell: Nachrichten sind nach zwei logischen Schritten fällig, werden FIFO je Replikat zugestellt und bei blockierter Verbindung behalten. Nur **Einen Schritt weiter** bewegt die Zeit. Dies ist eine Unterbrechung der Replikationsverbindung, kein Knotenausfall oder vollständige Netzpartition.
+- Jeweils ein wartender Lesevorgang. Replikat und Minimum stehen bei Anfragebeginn fest. Schreiben und weitere Lesevorgänge sind bis Abschluss oder Abbruch deaktiviert; Replikationssteuerung bleibt verfügbar.
+- Ein Sitzungslesen endet in einem Schritt, sobald das gewählte Replikat das angeforderte Minimum angewendet hat. Verbindungswiederherstellung allein stellt keine Nachrichten zu. Sofortiges Lesen wartet nie auf das Sitzungsminimum.
+- Kein automatischer Timeout, Failover, Routing, Wahlen, Persistenz, Mehrschlüsseltransaktionen oder vollständiges Protokoll kausaler Konsistenz. Zurücksetzen und Neuladen verwerfen den Zustand. Logische Schritte sind kein Latenzbenchmark.
+
+## Für die Entwurfsdiskussion
+
+Speichern gelingt, aber das gewählte Lesereplikat ist von der Replikation getrennt. Was ist für Ihr Produkt akzeptabel: ein alter Profilname, eine Warteanzeige, ein expliziter Fehler oder ein anderes Replikat? **Wo lebt die Mindestversion, wie erreicht sie die nächste Anfrage und welche Frist gilt?**
+
+## Quellen und weitere Lektüre
+
+Lektion, Diagramm und Experiment sind eigenständig erstellt. Der Mindestversionsmechanismus ist eine Erklärungshilfe für dieses Einschlüsselmodell, keine Implementierung eines Datenbankprotokolls.
+
+Als produktspezifisches Beispiel dokumentiert MongoDB read-your-writes in kausal konsistenten Sitzungen mit Majority Read und Write Concerns sowie sequenziellen Sitzungsoperationen. Diese Bedingungen und weitere Garantien gehören zu MongoDB, nicht zu diesem Simulator. Siehe [Read Isolation, Consistency, and Recency](https://www.mongodb.com/docs/manual/core/read-isolation-consistency-recency/) mit Sitzungsgarantien und Einschränkungen (geprüft am 26.10.2026).
+
+</section>
+</div>

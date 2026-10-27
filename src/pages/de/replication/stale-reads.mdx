@@ -1,0 +1,73 @@
+---
+layout: ../../../layouts/Layout.astro
+title: Replikation und veraltete Lesewerte
+description: Experimentieren Sie mit asynchroner Replikation, blockieren Sie ein Replikat und entdecken Sie, warum auf einen bestätigten Schreibvorgang ein alter Lesewert folgen kann.
+---
+
+import LessonHero from "../../../components/LessonHero.astro";
+import ReplicationLab from "../../../components/ReplicationLab";
+
+<LessonHero
+  title="Replikation"
+  subtitle="und veraltete Lesewerte"
+  description="Ein bestätigter Schreibvorgang bedeutet nicht, dass jede Kopie aktuell ist. Verfolgen Sie einen Wert durch ein kleines verteiltes System und entdecken Sie die Lücke."
+  tags={["Asynchrone Replikation", "Ein Leader", "Abwägungen bei Konsistenz"]}
+/>
+
+<ReplicationLab locale="de" client:load />
+
+<div className="prose-grid">
+<section>
+
+## Zuerst eine Vorhersage
+
+Die drei Knoten beginnen mit **Hello** bei Version 0. Schreiben Sie **Goodbye** und lesen Sie Replikat A, bevor Sie die Zeit vorwärts bewegen. Welchen Wert sollte es liefern?
+
+Es liefert **Hello**. Der Leader hat Version 1 angenommen, aber das Replikat hält noch Version 0. Gehen Sie zwei Schritte weiter und lesen Sie erneut: Jetzt liefert A **Goodbye**. Sie haben einen veralteten Lesewert und anschließend Konvergenz beobachtet.
+
+## Die Lücke ist Replikationsverzögerung
+
+Replikationsverzögerung ist die Zeit zwischen der Annahme eines Schreibvorgangs beim Leader und seiner Verfügbarkeit an einem Replikat. Hier beträgt sie zwei explizite Simulationsschritte. In realen Systemen können Transport, Warteschlangen, Plattenzugriffe und Replikatlast dazu beitragen.
+
+Ein Replikat antwortet aus dem Zustand, den es angewendet hat. Es weiß nicht automatisch, dass der Leader etwas Neueres hat. In diesem Modell bedeutet „veraltet“, dass die gelieferte Version älter ist als die Version des Leaders **zum Zeitpunkt des Lesens**. Der angezeigte letzte Lesevorgang bleibt eine historische Beobachtung, auch wenn die Zeit weiterläuft.
+
+## Eine Verbindung unterbrechen
+
+Setzen Sie das Experiment zurück. Blockieren Sie Replikat B, schreiben Sie **Goodbye** und gehen Sie zwei Schritte weiter. A holt auf, B nicht. Lesen Sie B und stellen Sie dann die Verbindung wieder her. Die Wiederherstellung allein stellt nichts zu: Gehen Sie einen weiteren Schritt, um überfällige Updates anzuwenden.
+
+Versuchen Sie nun zwei Schreibvorgänge, während B blockiert ist. Seine Warteschlange behält beide Versionen. Nach der Wiederherstellung werden sie im nächsten Schritt in Schreibreihenfolge angewendet. Der Endwert ist der neueste. Eine Unterbrechung kann in diesem Modell den Rückstand vergrößern, ohne den Leader am Schreiben zu hindern.
+
+</section>
+<section>
+
+## Welche Abwägung haben wir gewählt?
+
+Die Bestätigung beim Leader ohne Warten auf Replikate hält deren Verzögerung aus dem Bestätigungspfad heraus. Der Preis: Ein späterer Lesevorgang an einem Replikat kann eine ältere Version liefern — auch für den Client, der gerade geschrieben hat.
+
+Lesen beim Leader, Warten auf eine bestimmte Version oder Sitzungsgarantien sind mögliche Entwurfsansätze. Jeder bringt Kosten und Fehlerszenarien mit sich. Diese Ansätze simulieren wir hier nicht. Reale Datenbankgarantien hängen von Produkt, Topologie, Bestätigungsstrategie, Leserouting und Konfiguration ab; „repliziert“ allein sagt wenig aus.
+
+Als Nächstes vergleicht [Eigene Schreibvorgänge lesen](/de/replication/read-your-writes) sofortiges Lesen mit einem Lesevorgang, der auf die letzte bestätigte Schreibversion Ihrer Sitzung wartet.
+
+## Grenzen des Modells
+
+- Ein Leader, zwei Replikate und ein Schlüssel mit einem Stringwert. Alle starten bei v0.
+- Ein Schreibvorgang wird beim Leader sofort bestätigt. Das sagt nichts über die Dauerhaftigkeit bei einem Absturz aus.
+- Versionen sind logische Sequenznummern. Schritte sind Lerneinheiten, keine Millisekunden.
+- Jeder Schreibvorgang reiht eine Nachricht je Replikat ein, fällig nach zwei Schritten. Nur **Einen Schritt weiter** verändert die Zeit.
+- Jeder Schritt wendet **alle** fälligen Nachrichten über aktive Verbindungen in FIFO-Reihenfolge je Replikat an. Zwischenwerte können im selben Schritt angewendet werden.
+- Blockieren betrifft nur die Replikation vom Leader. Nachrichten bleiben erhalten; Lesen bleibt möglich. Das ist eine gezielte Verbindungsunterbrechung, kein kompletter Knotenausfall.
+- Keine Wahlen, Leaderausfälle, Wiederholungen, Nachrichtenverluste, Transaktionen, parallelen Clients oder Persistenz. Neuladen setzt den Zustand zurück; das Protokoll behält die letzten 100 Ereignisse.
+- Dies ist ein Erklärungsmodell, kein Datenbankbenchmark oder allgemeiner Konsistenzvertrag.
+
+## Für die Entwurfsdiskussion
+
+Eine Profiländerung wird bestätigt, aber nach dem Neuladen erscheint der alte Name. Fragen Sie vor dem Einbau von Wiederholungen: **Wo wurde das Schreiben abgeschlossen, wohin ging das Lesen und welche Garantie verbindet beides?**
+
+## Quellen und weitere Lektüre
+
+Erklärungen, Diagramm und Simulator dieser Seite sind eigenständig erstellt. Zu den thematischen Inspirationsquellen gehört Martin Kleppmanns _Designing Data-Intensive Applications_ (O'Reilly, 2017). Das Projekt ist unabhängig und steht in keiner Verbindung zum Autor oder Verlag.
+
+Konkrete Implementierungsunterschiede beschreiben die offiziellen Dokumentationen zu [PostgreSQL Warm Standby und asynchroner Replikation](https://www.postgresql.org/docs/current/warm-standby.html) und [MongoDB kausaler Konsistenz](https://www.mongodb.com/docs/manual/core/causal-consistency-read-write-concerns/). Sie beschreiben ihre eigenen Systeme, nicht die Garantien dieser Simulation.
+
+</section>
+</div>

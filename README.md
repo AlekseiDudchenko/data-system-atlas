@@ -53,3 +53,20 @@ Topic inspiration includes Martin Kleppmann's _Designing Data-Intensive Applicat
 Original project code and content are licensed under [MIT](LICENSE). Third-party dependencies retain their own licenses. Referenced books and documentation are not included in this license.
 
 Repository note: the existing GitHub repository is `AlekseiDudchenko/data-system-atlas` (singular); the product name is **Data Systems Atlas**.
+
+## Languages
+
+English uses the existing root URLs; German uses `/de/` and Russian `/ru/`.
+The header language switcher opens the same page in the chosen language.
+
+Shared UI strings live in `src/i18n/de.ts` and `src/i18n/ru.ts`; the typed
+English source phrases are the translation keys. Use `translator(locale)` for
+UI text and `localizedPath(locale, path)` for internal links. Placeholders such
+as `{0}` are substituted after translation, so user-entered values are preserved.
+Simulation logs store event data and are formatted by `src/i18n/log.ts`.
+
+Lessons are MDX files under `src/pages/`, `src/pages/de/` and `src/pages/ru/`.
+When adding or updating a lesson, keep all three versions, their metadata and
+links in sync. React labs receive the page locale as a prop; the simulation
+models remain shared across languages. The sample values `Hello`, `Goodbye`
+and `New name` are intentionally the same in each language.

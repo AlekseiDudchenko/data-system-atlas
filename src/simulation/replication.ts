@@ -20,13 +20,28 @@ export type ReadResult = Readonly<{
   leaderVersion: number;
   stale: boolean;
 }>;
+export type LogEntry = Readonly<
+  { step: number } & (
+    | { type: "initial"; value: string }
+    | { type: "write"; version: number; value: string }
+    | {
+        type: "read";
+        target: Follower;
+        value: string;
+        version: number;
+        stale: boolean;
+      }
+    | { type: "block"; target: Follower; blocked: boolean }
+    | { type: "delivery"; count: number }
+  )
+>;
 export type State = Readonly<{
   step: number;
   leader: Replica;
   followers: Readonly<Record<Follower, Replica>>;
   blocked: Readonly<Record<Follower, boolean>>;
   queue: readonly Message[];
-  log: readonly string[];
+  log: readonly LogEntry[];
   lastRead: ReadResult | null;
 }>;
 export const FOLLOWERS: readonly Follower[] = ["A", "B"];
@@ -40,14 +55,14 @@ export function initialState(): State {
     },
     blocked: { A: false, B: false },
     queue: [],
-    log: ["Step 0 · All replicas begin at v0: “Hello”."],
+    log: [{ step: 0, type: "initial", value: "Hello" }],
     lastRead: null,
   };
 }
-function record(state: State, message: string): State {
+function record(state: State, entry: LogEntry): State {
   return {
     ...state,
-    log: [...state.log, `Step ${state.step} · ${message}`].slice(-100),
+    log: [...state.log, entry].slice(-100),
   };
 }
 export function transition(state: State, event: Event): State {
@@ -71,7 +86,7 @@ export function transition(state: State, event: Event): State {
             })),
           ],
         },
-        `Leader accepted v${leader.version}: “${value}”. Two updates queued.`,
+        { step: state.step, type: "write", version: leader.version, value },
       );
     }
     case "read": {
@@ -87,7 +102,13 @@ export function transition(state: State, event: Event): State {
             stale,
           },
         },
-        `Read follower ${event.target}: “${replica.value}” (v${replica.version}) — ${stale ? "STALE" : "current"} at read time.`,
+        {
+          step: state.step,
+          type: "read",
+          target: event.target,
+          ...replica,
+          stale,
+        },
       );
     }
     case "block":
@@ -96,7 +117,12 @@ export function transition(state: State, event: Event): State {
           ...state,
           blocked: { ...state.blocked, [event.target]: event.blocked },
         },
-        `Replication to ${event.target} ${event.blocked ? "blocked" : "restored"}. Queued updates are retained.`,
+        {
+          step: state.step,
+          type: "block",
+          target: event.target,
+          blocked: event.blocked,
+        },
       );
     case "step": {
       const step = state.step + 1;
@@ -114,9 +140,7 @@ export function transition(state: State, event: Event): State {
         };
       return record(
         { ...state, step, queue, followers },
-        ready.length
-          ? `Delivered ${ready.length} update(s), in write order per follower.`
-          : "No updates delivered. Links may be blocked or messages are not due yet.",
+        { step, type: "delivery", count: ready.length },
       );
     }
   }
