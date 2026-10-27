@@ -1,12 +1,27 @@
+import { translator, type Locale } from "../i18n";
 import { FOLLOWERS, type State } from "../simulation/replication";
-export default function ReplicationTopology({ state }: { state: State }) {
+export default function ReplicationTopology({
+  state,
+  locale = "en",
+}: {
+  state: State;
+  locale?: Locale;
+}) {
+  const t = translator(locale);
   return (
     <>
       <svg
         className="topology"
         viewBox="0 0 780 250"
         role="img"
-        aria-label={`Leader version ${state.leader.version}. Follower A version ${state.followers.A.version}, ${state.blocked.A ? "blocked" : "connected"}. Follower B version ${state.followers.B.version}, ${state.blocked.B ? "blocked" : "connected"}.`}
+        aria-label={t(
+          "Leader version {0}. Follower A version {1}, {2}. Follower B version {3}, {4}.",
+          state.leader.version,
+          state.followers.A.version,
+          state.blocked.A ? t("blocked") : t("connected"),
+          state.followers.B.version,
+          state.blocked.B ? t("blocked") : t("connected"),
+        )}
       >
         <defs>
           <marker
@@ -32,14 +47,15 @@ export default function ReplicationTopology({ state }: { state: State }) {
             />
             <text x="345" y={i === 0 ? 62 : 216} fill="currentColor">
               {state.blocked[id]
-                ? "× blocked"
-                : `${state.queue.filter((m) => m.target === id).length} pending`}
+                ? t("× blocked")
+                : `${state.queue.filter((m) => m.target === id).length} ${t("queued")}`}
             </text>
           </g>
         ))}
         <rect x="25" y="75" width="265" height="100" rx="14" fill="#113d3a" />
         <text x="48" y="110" fill="#95ebd4">
-          LEADER · v{state.leader.version}
+          {t("LEADER · v")}
+          {state.leader.version}
         </text>
         <text x="48" y="148" fill="white">
           {state.leader.value.length > 20
@@ -58,7 +74,10 @@ export default function ReplicationTopology({ state }: { state: State }) {
               stroke="#a5bcb3"
             />
             <text x="500" y={i * 130 + 45} fill="#294b43">
-              FOLLOWER {id} · v{state.followers[id].version}
+              {t("FOLLOWER") + " "}
+              {id}
+              {" " + t("· v")}
+              {state.followers[id].version}
             </text>
             <text x="500" y={i * 130 + 81} fill="#172f2b">
               {state.followers[id].value.length > 20
@@ -68,18 +87,22 @@ export default function ReplicationTopology({ state }: { state: State }) {
           </g>
         ))}
       </svg>
-      <div className="node-summary" aria-label="Full node values">
+      <div className="node-summary" aria-label={t("Full node values")}>
         <p>
-          Leader: <strong>{state.leader.value}</strong> · v
+          {t("Leader:") + " "}
+          <strong>{state.leader.value}</strong>
+          {" " + t("· v")}
           {state.leader.version}
         </p>
         {FOLLOWERS.map((id) => (
           <p key={id}>
-            Follower {id}: <strong>{state.followers[id].value}</strong> · v
+            {t("Follower") + " "}
+            {id}: <strong>{state.followers[id].value}</strong>
+            {" " + t("· v")}
             {state.followers[id].version} ·{" "}
             {state.followers[id].version < state.leader.version
-              ? "behind"
-              : "caught up"}
+              ? t("behind")
+              : t("caught up")}
           </p>
         ))}
       </div>

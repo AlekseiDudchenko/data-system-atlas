@@ -560,3 +560,34 @@ footer {
     scroll-behavior: auto !important;
   }
 }
+
+.site-header {
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+.language-switcher {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.language-switcher a[aria-current="page"] {
+  font-weight: 800;
+  text-decoration: underline;
+}
+@media (max-width: 600px) {
+  .language-switcher {
+    width: 100%;
+  }
+  .language-switcher a:first-child {
+    display: inline;
+  }
+  .lab-heading {
+    gap: 12px;
+  }
+  .lab-heading h2 {
+    overflow-wrap: anywhere;
+  }
+}
+h1 {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}

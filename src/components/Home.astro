@@ -1,0 +1,79 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { localeFromPath, localizedPath, translator } from "../i18n";
+const locale = localeFromPath(Astro.url.pathname);
+const t = translator(locale);
+const topics = [
+  "Foundations",
+  "Storage Engines",
+  "Replication",
+  "Partitioning",
+  "Transactions & Consistency",
+  "Distributed Coordination",
+  "Event-Driven Systems",
+  "Architecture Patterns",
+] as const;
+---
+
+<Layout title={t("Explore. Break. Understand.")}>
+  <section class="hero home-hero">
+    <span class="eyebrow">{t("A FIELD GUIDE TO DATA SYSTEMS")}</span>
+    <h1>
+      {t("Understand the system.")}
+      <br />
+      <em>{t("By changing it.")}</em>
+    </h1>
+    <p>
+      {t(
+        "Make a write. Cut a connection. Read an old value. Explore the trade-offs behind the systems you build, one experiment at a time.",
+      )}
+    </p>
+    <a class="button" href={localizedPath(locale, "/replication/stale-reads")}>
+      {t("Start with replication")} <span aria-hidden="true">↗</span>
+    </a>
+    <span class="meta">
+      {t("03 interactive lessons · Built for curious engineers")}
+    </span>
+  </section>
+  <section id="atlas" class="atlas-section">
+    <div class="section-heading">
+      <h2>{t("Your map of data systems")}</h2>
+      <p>{t("Eight territories. One connected view.")}</p>
+    </div>
+    <div class="atlas-grid">
+      {topics.map((topic, i) => (
+        <article class:list={["topic", { available: i === 2 || i === 3 }]}>
+          <span class="eyebrow">
+            0{i + 1} /{" "}
+            {i === 2 || i === 3 ? t("EXPLORE NOW") : t("ON THE HORIZON")}
+          </span>
+          <h3>{t(topic)}</h3>
+          {i === 2 ? (
+            <>
+              <p>
+                {t(
+                  "When a successful write and an old read can both be correct.",
+                )}
+              </p>
+              <a href={localizedPath(locale, "/replication/stale-reads")}>
+                {t("Replication and Stale Reads")} →
+              </a>
+              <a href={localizedPath(locale, "/replication/read-your-writes")}>
+                {t("Read Your Writes")} →
+              </a>
+            </>
+          ) : i === 3 ? (
+            <>
+              <p>{t("Evenly placed keys can still produce uneven traffic.")}</p>
+              <a href={localizedPath(locale, "/partitioning/hotspots")}>
+                {t("Partitioning and Hotspots")} →
+              </a>
+            </>
+          ) : (
+            <p>{t("Planned territory")}</p>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
+</Layout>

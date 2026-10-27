@@ -11,9 +11,34 @@ import SessionLab from "../../components/SessionLab";
   title="Read Your"
   subtitle="Writes"
   experiment="02"
-  description="You saved a new profile name. Should your next read show it? Carry a session minimum to a follower and discover what happens when that follower cannot catch up."
+  description="You save a new profile name, see a success message, then refresh—and the old name is back. How can a successful save be followed by an outdated read?"
   tags={["Session guarantees", "Minimum version", "Waiting vs availability"]}
 />
+
+<div className="prose-grid">
+<section>
+
+## Why can the old name come back?
+
+An application can keep several copies of its data so that more than one machine can serve reads. In the system below, writes go to one primary copy, the **leader**. Two other copies, **followers A and B**, receive those changes through replication. The application can send a later read to either follower.
+
+Here, replication is asynchronous: the leader confirms your save before the followers have applied it. If your profile page reads from a follower that is still behind, it shows the old name. Your write succeeded at the leader; the copy serving your read has not caught up yet.
+
+The engineering question is: **how can the next request respect the save you were just told succeeded?**
+
+</section>
+<section>
+
+## What does “read your writes” promise?
+
+After a write is confirmed, your subsequent reads must return a state that includes that write or a later update. This is a **session guarantee**: it connects your own operations. It does not require every replica to be up to date for every user.
+
+This experiment represents your session as a remembered minimum version. If your save was confirmed as **v1**, your next session read asks for **v1 or newer**. A follower at **v0** cannot satisfy that request yet. The version is a sequence number, not a time in milliseconds.
+
+Below, compare an immediate read with one that requires your write. **Predict first:** if the selected follower is behind, should it return the old name, wait, or send the request elsewhere? Then block its replication link to discover the cost of waiting. Only **Advance one step** moves simulation time; updates normally arrive after two steps.
+
+</section>
+</div>
 
 <SessionLab client:load />
 

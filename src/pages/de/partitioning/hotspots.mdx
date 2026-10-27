@@ -1,0 +1,76 @@
+---
+layout: ../../../layouts/Layout.astro
+title: Partitionierung und Hotspots
+description: Verteilen Sie eine reproduzierbare Last auf drei Partitionen und entdecken Sie, warum gleichmäßige Schlüsselverteilung keinen gleichmäßigen Datenverkehr garantiert.
+---
+
+import LessonHero from "../../../components/LessonHero.astro";
+import PartitionLab from "../../../components/PartitionLab";
+
+<LessonHero
+  title="Partitionierung"
+  subtitle="und Hotspots"
+  territory="Partitioning"
+  experiment="03"
+  description="Zwölf Schlüssel, drei Besitzer und genug Gesamtkapazität. Ändern Sie die Anfrageverteilung und entdecken Sie, warum eine Warteschlange wächst, während andere Partitionen untätig sind."
+  tags={["Schlüsselrouting", "Ungleiche Last", "Lokale Kapazität"]}
+/>
+
+<PartitionLab locale="de" client:load />
+
+<div className="prose-grid">
+<section>
+
+## Den meistbelasteten Besitzer vorhersagen
+
+Stellen Sie sich Anfragen an zwölf Produktseiten mit Schlüsseln **0–11** vor. Jeder Schlüssel hat einen festen Besitzer: **Partition = Schlüssel modulo 3**. P0 besitzt 0, 3, 6 und 9; P1 besitzt 1, 4, 7 und 10; P2 besitzt 2, 5, 8 und 11. Je vier Schlüssel. Garantiert das gleiche Arbeit?
+
+Pro Schritt kann jede Partition bis zu **vier gleich aufwendige Anfragen** abschließen. Ein Stapel fügt vor der Verarbeitung zwölf Anfragen hinzu. Sagen Sie die Warteschlangen voraus und vergleichen Sie:
+
+1. Behalten Sie **Gleichmäßig** bei und drücken Sie **12 Anfragen senden + Schritt**. Jeder Schlüssel erhält eine Anfrage. Die Eingänge sind **4 / 4 / 4**; alle zwölf werden abgeschlossen, keine Warteschlange bleibt.
+2. Wählen Sie **Hot Key**. Ein neuer Lauf beginnt mit derselben Platzierung. Schlüssel 0 erhält neun Anfragen; Schlüssel 1, 2 und 3 jeweils eine. Welche Partition besitzt den größten Teil der Arbeit?
+3. Senden Sie einen Stapel. Die Eingänge sind **10 / 1 / 1**. P0 beendet vier und reiht sechs ein. P1 und P2 beenden jeweils eine. Zwölf Einheiten Gesamtkapazität waren vorhanden, aber nur sechs Anfragen wurden abgeschlossen.
+4. Senden Sie einen weiteren Stapel. Die Warteschlange von P0 wächst auf **zwölf**. Wählen Sie dreimal **Einen Schritt abarbeiten**, um sie ohne neue Eingänge zu leeren.
+
+Die Balken zeigen den Anteil jeder Partition an allen empfangenen Anfragen auf einer festen Skala von 0–100%. Die Tabelle enthält exakte Eingänge, abgeschlossene Arbeit und wartende Anfragen. Gerundete Anteile ergeben zusammen möglicherweise nicht 100%.
+
+## Platzierung ist nicht Datenverkehr
+
+Beide Lastprofile platzieren vier Schlüssel auf jeder Partition. Nur die Anfragehäufigkeiten unterscheiden sich. Das heiße Lastprofil sendet **75% der Anfragen an einen Schlüssel**. Eine weitere Anfrage betrifft einen anderen Schlüssel desselben Besitzers. Diese Partition erhält deshalb **10 von 12 Anfragen**, etwa 83%.
+
+Versuchen Sie Hot Key 1. Die hohe Last wandert zu P1. Bei Hot Key 3 kehrt sie zu P0 zurück. Zwischen Schlüsseln zu wechseln ist nicht dasselbe wie Last auf Besitzer zu verteilen. Den Besitzer jedes Schlüssels finden Sie in Auswahl und Tabelle.
+
+## Den Druck aufrechterhalten
+
+Wiederholte Stapel zeigen ein Kapazitätsproblem. Die meistbelastete Partition erhält zehn Anfragen, bedient aber nur vier pro Schritt: Ihre Warteschlange wächst um sechs je Stapel. Freie Kapazität bei einem anderen Besitzer verarbeitet diese Anfragen nicht automatisch. **Einen Schritt abarbeiten** pausiert die Eingänge, nicht die Verarbeitung; die Warteschlange schrumpft um bis zu vier.
+
+Eine Änderung des Lastprofils oder Hot Keys löscht den Lauf, damit Vergleiche bei null starten. Bestehende Anfragen werden nicht migriert. **Lauf zurücksetzen** löscht die Zähler und behält die Auswahl. Neuladen stellt das gleichmäßige Standardprofil wieder her.
+
+</section>
+<section>
+
+## Was könnte ein Engineer ändern?
+
+Eine virale Produktseite kann Arbeit konzentrieren, obwohl die Schlüsselzahlen ausgeglichen wirken. Betrachten Sie Aktivität je Schlüssel und Partition, Anfragekosten, Warteschlangen und Kapazität, statt nur gespeicherte Schlüssel zu zählen.
+
+Caching wiederholter Lesezugriffe kann die beim Besitzer ankommende Arbeit reduzieren. Das Verschieben eines Hot Keys ändert, welcher Besitzer seinen Datenverkehr trägt. Ein logischer Schlüssel lässt sich für manche Lastprofile auf mehrere physische Schlüssel aufteilen. Das kann verteilte Lesezugriffe, Aggregation oder andere Ordnungs- und Atomaritätsgarantien erfordern. Zusätzliche Partitionen verteilen andere Schlüssel; ein einzelner unteilbarer Hot Key hat bei dieser Routingregel weiterhin einen Besitzer. Keine dieser Maßnahmen ist im Experiment implementiert.
+
+## Grenzen des Modells
+
+- Drei feste logische Partitionen, zwölf ganzzahlige Schlüssel und explizites Modulo-Routing. Dies ist eine Lernregel, keine produktive Hashfunktion oder ein Modell physischer Platzierung eines Anbieters.
+- Jede Anfrage kostet gleich viel. Jeder Besitzer bedient nach den Eingängen bis zu vier Anfragen pro logischem Schritt, einschließlich älterer wartender Arbeit. Ungenutzte Kapazität verfällt für diesen Schritt und wird nicht verliehen.
+- Gleichmäßige Stapel enthalten jeden Schlüssel einmal. Heiße Stapel enthalten neun Kopien des gewählten Schlüssels und die nächsten drei Schlüssel zyklisch jeweils einmal. Kein Zufall und keine gemessene Produktionslast.
+- Anfragen werden durch Zähler je Partition dargestellt, nicht durch gespeicherte Datensätze, Werte, einzelne Antwortzeiten oder geordnete Operationen. Es werden keine Latenzperzentile, Dauerhaftigkeits- oder Durchsatzbenchmarks beansprucht.
+- Warteschlangen behalten alle unvollendete Arbeit; keine Ablehnung, Timeouts, Wiederholungen oder Backpressure. Überlast wird absichtlich als wachsende Warteschlange sichtbar. Reale Systeme können Last begrenzen oder verwerfen.
+- Nur Stapel- und Abarbeitungsaktionen bewegen die logische Zeit. Keine Uhren, Netzwerkfehler, Replikation, parallele Ausführung, Neuverteilung, Persistenz oder automatische Skalierung. Eine neue Auswahl startet ein neues Experiment, statt Migration zu simulieren.
+
+## Für die Entwurfsdiskussion
+
+Ein Katalog ist gleichmäßig partitioniert, aber ein Produktstart überlastet eine Produktseite. **Begrenzt die Schlüsselplatzierung, die Anfragehäufigkeit, der Anfrageaufwand oder die Kapazität das System?** Welche Maßnahme verändert die beim Besitzer ankommende Arbeit, welche verschiebt sie nur? Welche Garantien müssten Sie beim Aufteilen des Schlüssels überdenken?
+
+## Quellen und weitere Lektüre
+
+Text, Diagramm, Lastprofil und Modell sind eigenständig erstellt. Für ein konkretes Produkt empfiehlt AWS, Zugriffsmuster zu berücksichtigen und Aktivität über Partitionsschlüssel zu verteilen: [DynamoDB-Empfehlungen für Partitionsschlüssel](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-partition-key-design.html) (geprüft am 26.10.2026). DynamoDB-Kapazitätseinheiten, adaptive Kapazität und Platzierungsverhalten sind produktspezifisch; die Regel von vier Anfragen pro Schritt ist hier zu Lernzwecken erfunden.
+
+</section>
+</div>
