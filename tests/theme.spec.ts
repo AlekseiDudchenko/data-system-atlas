@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-test("theme follows the system and keeps a keyboard override across languages and reloads", async ({
+test("theme follows the system and keeps a keyboard override across pages and reloads", async ({
   page,
 }) => {
   await page.emulateMedia({ colorScheme: "dark" });
-  await page.goto("/ru/replication/read-your-writes");
+  await page.goto("/ru/data-transfers/");
   const toggle = page.getByRole("button", { name: "Тёмная тема", exact: true });
   await expect(toggle).toHaveAttribute("aria-pressed", "true");
   await toggle.focus();
@@ -13,12 +13,11 @@ test("theme follows the system and keeps a keyboard override across languages an
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.reload();
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
-  await page.getByRole("link", { name: "Deutsch", exact: true }).click();
-  await expect(
-    page.getByRole("button", { name: "Dunkles Design" }),
-  ).toHaveAttribute("aria-pressed", "false");
+  await page.getByRole("link", { name: "Data Systems Atlas" }).click();
+  await expect(page).toHaveURL(/\/ru\/$/);
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
   await page.emulateMedia({ colorScheme: "light" });
-  await page.getByRole("button", { name: "Dunkles Design" }).click();
+  await toggle.click();
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
@@ -26,21 +25,15 @@ test("theme follows the system and keeps a keyboard override across languages an
 test("dark pages and simulation feedback retain contrast and mobile reflow", async ({
   page,
 }) => {
-  await page.emulateMedia({ colorScheme: "dark" });
-  for (const path of [
-    "/",
-    "/replication/stale-reads",
-    "/ru/replication/read-your-writes",
-    "/de/partitioning/hotspots",
-  ]) {
+  await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+  for (const path of ["/ru/", "/ru/data-transfers/"]) {
     await page.goto(path);
-    if (path === "/replication/stale-reads") {
+    if (path !== "/ru/") {
       await page
-        .getByRole("button", { name: "Write value", exact: true })
+        .getByRole("button", { name: "Пишем пакетами.", exact: true })
         .click();
-      await page
-        .getByRole("button", { name: "Read follower", exact: true })
-        .click();
+      await page.getByRole("button", { name: "Запустить перенос" }).click();
+      await expect(page.getByRole("status")).toContainText("Готово");
     }
     expect(
       (
@@ -55,7 +48,6 @@ test("dark pages and simulation feedback retain contrast and mobile reflow", asy
       ),
     ).toBe(true);
   }
-  await page.goto("/ru/replication/read-your-writes");
   await page.screenshot({
     path: `test-results/theme-${test.info().project.name}.png`,
     fullPage: true,
@@ -71,7 +63,7 @@ test("system dark theme works without JavaScript and with unavailable storage", 
     colorScheme: "dark",
   });
   const page = await context.newPage();
-  await page.goto(`${baseURL}/ru/replication/read-your-writes`);
+  await page.goto(`${baseURL}/ru/data-transfers/`);
   await expect(page.locator("html")).toHaveCSS("color-scheme", "dark");
   await expect(page.locator(".theme-toggle")).toBeHidden();
   await context.close();
@@ -84,8 +76,8 @@ test("system dark theme works without JavaScript and with unavailable storage", 
     });
   });
   const restrictedPage = await restricted.newPage();
-  await restrictedPage.goto(`${baseURL}/`);
-  await restrictedPage.getByRole("button", { name: "Dark theme" }).click();
+  await restrictedPage.goto(`${baseURL}/ru/`);
+  await restrictedPage.getByRole("button", { name: "Тёмная тема" }).click();
   await expect(restrictedPage.locator("html")).toHaveAttribute(
     "data-theme",
     "light",

@@ -1,49 +1,38 @@
 # Roadmap and backlog
 
-This roadmap is ordered by dependency and learner value. Estimates are focused engineering days, not promised calendar dates. Build one complete lesson before extracting shared abstractions.
+Direction: [VISION.md](../VISION.md), agreed 2026-10-28. Active work lives in GitHub Issues; this file keeps the order and the decisions behind it. Build one strong exploration before extracting shared abstractions.
 
-## Status — 2026-10-27
+## Status — 2026-10-28
 
-- M0 is complete: #6–#10 and verification follow-up #15 shipped in PR #14.
-- M1 implementation is complete: read-your-writes (#11, PR #17) and public deployment (#13) have shipped; learner feedback remains open.
-- M2 is complete: partitioning and hotspots (#12, PR #18) has shipped.
-- GitHub Actions restoration (#16) remains a non-blocking infrastructure follow-up. Local checks remain the development and merge route while Actions is unavailable.
-- Latest local verification: typecheck, lint, 19 unit tests, four-page production build, and 20 desktop/mobile browser tests passed. This run used installed Google Chrome and an isolated preview port; the standard port was occupied and managed Chromium was absent. Feature validation records retain their original run details.
+- `main` (`d560b54`) has the new editorial design and dark theme, plus the earlier lessons and a data-migration prototype. Typecheck, lint, 26 unit tests and the production build pass locally; browser tests were not re-run.
+- Decisions: keep the headline "How data systems work"; Scaling Large Data Transfers is the first and only exploration; retire the old lessons and the migration prototype; no "How it works" block and no About page; the site is Russian only for now (`/`, `/de/` redirect to `/ru/`).
+- GitHub Actions are unavailable (#16). Validate locally and record which checks ran.
 
-Public site: https://data-systems-atlas.dudchenko.org/. See [production verification](production-validation.md): 26 production browser tests passed after fixing early input before hydration. Next: gather learner feedback on the three lessons, then scope the next experiment.
+## P0 — first exploration
 
-## Epics
+| Order | Issue                                                                  | Scope                                                                 | Depends on |
+| ----- | ---------------------------------------------------------------------- | --------------------------------------------------------------------- | ---------- |
+| 1     | [#20](https://github.com/AlekseiDudchenko/data-system-atlas/issues/20) | Retire old lessons and migration prototype; redirects                 | —          |
+| 2     | [#21](https://github.com/AlekseiDudchenko/data-system-atlas/issues/21) | Pull-transfer model: sequential, lazy reading, batch writes; ADR 0006 | —          |
+| 3     | [#22](https://github.com/AlekseiDudchenko/data-system-atlas/issues/22) | Exploration page: scenes, diagram, metrics, assumptions               | #21        |
+| 4     | [#23](https://github.com/AlekseiDudchenko/data-system-atlas/issues/23) | Home with one featured exploration; new footer                        | #20, #22   |
+| 5     | [#24](https://github.com/AlekseiDudchenko/data-system-atlas/issues/24) | Validation and release                                                | #20–#23    |
 
-| Epic                                                                                              | Scope                                   | Implementation issues |
-| ------------------------------------------------------------------------------------------------- | --------------------------------------- | --------------------- |
-| [E1 — Platform Foundation](https://github.com/AlekseiDudchenko/data-system-atlas/issues/1)        | Static shell and workflow               | #6                    |
-| [E2 — Educational Content System](https://github.com/AlekseiDudchenko/data-system-atlas/issues/2) | Original content and editorial contract | #7                    |
-| [E3 — Simulation Engine](https://github.com/AlekseiDudchenko/data-system-atlas/issues/3)          | Pure events and model tests             | #8                    |
-| [E4 — Learning Modules](https://github.com/AlekseiDudchenko/data-system-atlas/issues/4)           | First lesson and later experiments      | #9, #11, #12          |
-| [E5 — Quality & Launch](https://github.com/AlekseiDudchenko/data-system-atlas/issues/5)           | Validation, review and deployment       | #10, #13              |
+#20 and #21 can run in parallel. Ship #20 together with #22/#23 so the public home never shows an empty atlas.
 
-## M0: Working vertical slice — complete (initial estimate: roughly 3–5 days)
+## P1 — failures and scale
 
-1. [#6 Platform](https://github.com/AlekseiDudchenko/data-system-atlas/issues/6): installable static Astro app, strict TypeScript, MDX/React, navigation, local checks, CI.
-2. [#7 Content](https://github.com/AlekseiDudchenko/data-system-atlas/issues/7), depends on #6: vision, architecture, ADRs and original lesson format.
-3. [#8 Model](https://github.com/AlekseiDudchenko/data-system-atlas/issues/8), depends on #6: deterministic replication transitions, queue, block/restore and unit tests.
-4. [#9 Lesson](https://github.com/AlekseiDudchenko/data-system-atlas/issues/9), depends on #7/#8: SVG plus semantic controls, historical reads, visible log, limitations and experiments.
-5. [#10 Validation](https://github.com/AlekseiDudchenko/data-system-atlas/issues/10), depends on #6–#9: production-build browser tests, accessibility/mobile checks, independent review and PR merge.
+[#25](https://github.com/AlekseiDudchenko/data-system-atlas/issues/25): retry and lost acknowledgements, idempotency, checkpoint/resume, then parallel pull and contention. Split into issues after P0.
 
-Exit: A learner reproduces stale reads and explains recovery. All gates pass. Deployment may be blocked on account access but must be documented explicitly.
+## P2 — push-based path
 
-## M1: Public deployment and deeper replication — in progress (initial estimate: roughly 2–4 days)
+[#26](https://github.com/AlekseiDudchenko/data-system-atlas/issues/26): queue/stream, consumers, lag, dead-letter, replay; later live migration/CDC and reconciliation. Discovery only.
 
-- [x] [#13 Cloudflare Pages](https://github.com/AlekseiDudchenko/data-system-atlas/issues/13): repository connected, main published, HTTPS domain and production scenarios verified. See [release record](production-validation.md); rollback procedure is documented, but a live rollback was not exercised.
-- [x] [#11 Read-your-writes](https://github.com/AlekseiDudchenko/data-system-atlas/issues/11), shipped in PR #17: one session, explicit minimum version, compare old reads with waiting. Includes failure and availability costs. See [validation](read-your-writes-validation.md).
-- [ ] Gather qualitative feedback: can a reader predict the old value, describe acknowledgment versus propagation, and name the omitted failure cases? Avoid adding analytics infrastructure before it is needed.
+## Infrastructure
 
-## M2: A second territory — complete (initial estimate: roughly 3–5 days)
+- [#16](https://github.com/AlekseiDudchenko/data-system-atlas/issues/16) Restore GitHub Actions — non-blocking.
+- Cloudflare Pages deploys `main` automatically: [deployment](deployment.md), [production verification](production-validation.md).
 
-- [x] [#12 Partitioning and hotspots](https://github.com/AlekseiDudchenko/data-system-atlas/issues/12), shipped in PR #18. One bounded routing experiment, predictable workload, accessible SVG and semantic counter table. See [validation](partitioning-validation.md). No content collection was needed.
+## History
 
-## Later, by learning dependency
-
-Foundations (latency, throughput and queues) supports Storage Engines (write amplification and compaction). Replication and partitioning support Transactions & Consistency (isolation counterexamples), then Distributed Coordination (leases and fencing with explicit clocks). Event-Driven Systems adds delivery/replay before Architecture Patterns combines bounded models into end-to-end trade-offs.
-
-These are discovery areas, not committed implementation tickets. Define the learner's question and failure model before scheduling each. No backend, login, progress synchronization, generic engine, or large course framework is part of these milestones.
+Before 2026-10-28 the atlas was a set of lessons (stale reads #9, read-your-writes #11, partitioning #12) built in M0–M2 and published with #13. That direction is superseded; the code remains in git history and ADRs 0003–0005 describe those models.

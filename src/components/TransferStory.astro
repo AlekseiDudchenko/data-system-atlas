@@ -1,0 +1,51 @@
+---
+import Layout from "../layouts/Layout.astro";
+import TransferExplorer from "./TransferExplorer";
+import { localeFromPath, localizedPath } from "../i18n";
+import { transferCopy as c } from "../content/transfers";
+const locale = localeFromPath(Astro.url.pathname);
+---
+
+<Layout title={c.category} description={c.intro} editorial>
+  <div class="story">
+    <header class="story-heading">
+      <a class="story-back" href={`${localizedPath(locale)}#atlas`}>
+        ← {c.back}
+      </a>
+      <p class="story-kicker">01 — {c.category}</p>
+      <h1>{c.title}</h1>
+      <p class="story-intro">{c.intro}</p>
+      <p class="story-scroll">↓ {c.scroll}</p>
+    </header>
+    <noscript>
+      <p class="story-noscript">{c.noJs}</p>
+    </noscript>
+    <TransferExplorer client:load />
+    <section class="story-footnotes">
+      <details>
+        <summary>{c.boundaries}</summary>
+        <p>{c.limits}</p>
+      </details>
+      <div class="story-sources">
+        <h2>{c.sources}</h2>
+        <p>{c.sourcesIntro}</p>
+        <a href="https://www.postgresql.org/docs/current/sql-declare.html">
+          PostgreSQL — DECLARE, курсоры ↗
+        </a>
+        <a
+          href="https://jdbc.postgresql.org/documentation/query/#getting-results-based-on-a-cursor"
+        >
+          PostgreSQL JDBC — чтение через курсор ↗
+        </a>
+        <a href="https://www.postgresql.org/docs/current/populate.html">
+          PostgreSQL — массовая загрузка данных ↗
+        </a>
+        <a
+          href="https://github.com/AlekseiDudchenko/data-transfer-service/blob/docs/large-data-transfer-notes/scaling-large-data-transfers-minimal.html"
+        >
+          {c.notes} ↗
+        </a>
+      </div>
+    </section>
+  </div>
+</Layout>
