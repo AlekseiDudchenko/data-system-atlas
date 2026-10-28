@@ -8,7 +8,9 @@ Live site: [Data Systems Atlas](https://data-systems-atlas.dudchenko.org/).
 
 `/ru/data-transfers/` — **Scaling large data transfers.** Copy a table from one database to another: a sequential script that loads everything and inserts one row at a time, then a million records that run it out of memory, lazy reading with a cursor, and batched inserts; then dropped connections and retries, a lost acknowledgement that duplicates a batch, UPSERT, checkpoints saved after or before the write, and several readers over key ranges. Run each step, change its decisions, and compare duration, round trips, memory, duplicates, lost records and speedup. All numbers come from explicit models ([ADR 0006](docs/adr/0006-transfer-cost-model.md), [ADR 0007](docs/adr/0007-failure-and-parallel-models.md)); they are estimates, not benchmarks.
 
-The site is Russian only for now. `/`, `/de/` and `/data-transfers/` redirect to the Russian pages; English and German return after translation.
+`/ru/data-transfers/push/` — **the push model.** When the source sends events itself: a direct push that loses events during a target outage, a queue that buffers them and the lag it builds, a poison message and a dead-letter queue, redelivery after a consumer crash and idempotent writes, and consumer groups that cannot keep up with a hot partition. A pull-or-push table closes the page; push is a different operating model, not the next step of pull ([ADR 0008](docs/adr/0008-push-model.md)).
+
+The site is Russian only for now. `/`, `/de/`, `/data-transfers/` and `/data-transfers/push/` redirect to the Russian pages; English and German return after translation.
 
 ## Development
 

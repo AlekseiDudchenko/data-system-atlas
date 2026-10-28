@@ -46,13 +46,16 @@ const description =
     <meta name="description" content={description} />
     <title>{title} · Data Systems Atlas</title>
     <link rel="canonical" href={canonical} />
-    {publishedLocales.length > 1 && publishedLocales.map((language) => (
-      <link
-        rel="alternate"
-        hreflang={language}
-        href={new URL(localizedPath(language, Astro.url.pathname), Astro.site)}
-      />
-    ))}
+    {publishedLocales.length > 1 &&
+      publishedLocales.map((language) => (
+        <link
+          rel="alternate"
+          hreflang={language}
+          href={
+            new URL(localizedPath(language, Astro.url.pathname), Astro.site)
+          }
+        />
+      ))}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body class:list={{ editorial: Astro.props.editorial }}>
@@ -74,18 +77,18 @@ const description =
       </nav>
       <div class="header-preferences">
         {publishedLocales.length > 1 && (
-        <nav class="language-switcher" aria-label={t("Language")}>
-          {publishedLocales.map((language) => (
-            <a
-              href={localizedPath(language, Astro.url.pathname)}
-              lang={language}
-              hreflang={language}
-              aria-current={language === locale ? "page" : undefined}
-            >
-              {languageNames[language]}
-            </a>
-          ))}
-        </nav>
+          <nav class="language-switcher" aria-label={t("Language")}>
+            {publishedLocales.map((language) => (
+              <a
+                href={localizedPath(language, Astro.url.pathname)}
+                lang={language}
+                hreflang={language}
+                aria-current={language === locale ? "page" : undefined}
+              >
+                {languageNames[language]}
+              </a>
+            ))}
+          </nav>
         )}
         <button class="theme-toggle" type="button" aria-pressed="false" hidden>
           <span aria-hidden="true">◐</span>
@@ -98,11 +101,10 @@ const description =
     </main>
     <footer>
       <span>
-        Data Systems Atlas · {
-          t(
-            "No perfect architectures. Only decisions, constraints and consequences.",
-          )
-        }
+        Data Systems Atlas ·{" "}
+        {t(
+          "No perfect architectures. Only decisions, constraints and consequences.",
+        )}
       </span>
       <span>{t("An open collection of interactive explorations.")}</span>
     </footer>

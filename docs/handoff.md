@@ -2,15 +2,16 @@
 
 ## Where things stand
 
-- Direction changed: [VISION.md](../VISION.md). The atlas is a collection of interactive architecture explorations; the first and only one planned is Scaling Large Data Transfers.
-- `main` at `d560b54` holds the editorial redesign (keep it), the dark theme, three earlier lessons and a data-migration prototype (both to be retired in #20).
-- Local checks on `d560b54`: typecheck 0 errors, lint clean, 26 unit tests, build of 15 pages. Browser tests not re-run.
+- Direction: [VISION.md](../VISION.md). One exploration, Scaling Large Data Transfers, in Russian only: the pull page `/ru/data-transfers/` (eight scenes: volume, failures, parallel readers) and the push page `/ru/data-transfers/push/` (five scenes and a pull-or-push table).
+- Shipped: P0 in PR #27, P1 in PR #28, P2 in the PR closing #26. Each release is checked in production ([record](production-validation.md)).
+- Models and their assumptions: ADRs 0006–0008.
 
 ## Next
 
-Follow the [roadmap](roadmap.md): #20 and #21 first, then #22, #23, #24. Work on a branch and merge through a PR; do not push to `main` directly — it deploys to production.
+See "Next, not scheduled" in the [roadmap](roadmap.md). Work on a branch and merge through a PR; `main` deploys to production.
 
 ## Notes
 
 - Astro needs Node ≥ 22.23 (Node 24 pinned in `.node-version`).
 - GitHub Actions are unavailable (#16); record the local checks in each PR.
+- Cloudflare Pages has no branch previews; share a preview as a built page if needed.

@@ -29,7 +29,7 @@ Presentation reference: [samwho — load balancing](https://samwho.dev/load-bala
 - **Design:** the editorial design shipped in `d560b54` — warm light theme with a dark theme, large typography, restrained copper accent, scroll-driven scenes beside a sticky interactive diagram.
 - **Navigation:** logo · Explore the atlas · GitHub · language · theme. No separate About page and no "How it works" block.
 - **Home:** headline "How data systems work", the supporting line above, and one featured exploration with a small preview of its diagram. Only working explorations are listed.
-- **Explorations:** Scaling Large Data Transfers is the first and, for now, the only exploration. The earlier lessons (stale reads, read-your-writes, partitioning) and the data-migration prototype are retired; they remain in git history.
+- **Explorations:** Scaling Large Data Transfers is the first and, for now, the only exploration: a pull page (`/ru/data-transfers/`) and a push page (`/ru/data-transfers/push/`). The earlier lessons (stale reads, read-your-writes, partitioning) and the data-migration prototype are retired; they remain in git history.
 
 ## First exploration: Scaling Large Data Transfers
 
