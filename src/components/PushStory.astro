@@ -1,0 +1,71 @@
+---
+import Layout from "../layouts/Layout.astro";
+import PushExplorer from "./PushExplorer";
+import { localeFromPath, localizedPath } from "../i18n";
+import { pushCopy as c } from "../content/push";
+const locale = localeFromPath(Astro.url.pathname);
+---
+
+<Layout title={c.category} description={c.intro} editorial>
+  <div class="story">
+    <header class="story-heading">
+      <a class="story-back" href={localizedPath(locale, "/data-transfers/")}>
+        ← {c.back}
+      </a>
+      <p class="story-kicker">01 — {c.category}</p>
+      <h1>{c.title}</h1>
+      <p class="story-intro">{c.intro}</p>
+      <p class="story-scroll">↓ {c.scroll}</p>
+    </header>
+    <noscript>
+      <p class="story-noscript">{c.noJs}</p>
+    </noscript>
+    <PushExplorer client:load />
+    <section class="story-versus" aria-labelledby="versus-title">
+      <h2 id="versus-title">{c.compareTitle}</h2>
+      <p>{c.compareIntro}</p>
+      <div class="story-compare">
+        <table>
+          <thead>
+            <tr>
+              {c.compareHead.map((head) => (
+                <th scope="col">{head}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {c.comparison.map(([question, pull, push]) => (
+              <tr>
+                <th scope="row">{question}</th>
+                <td>{pull}</td>
+                <td>{push}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section class="story-footnotes">
+      <details>
+        <summary>{c.boundaries}</summary>
+        <p>{c.limits}</p>
+      </details>
+      <div class="story-sources">
+        <h2>{c.sources}</h2>
+        <p>{c.sourcesIntro}</p>
+        <a href="https://kafka.apache.org/documentation/#design_consumerposition">
+          Apache Kafka — позиция потребителя и offset ↗
+        </a>
+        <a href="https://kafka.apache.org/documentation/#semantics">
+          Apache Kafka — гарантии доставки ↗
+        </a>
+        <a href="https://www.rabbitmq.com/docs/dlx">
+          RabbitMQ — dead letter exchanges ↗
+        </a>
+        <a href="https://github.com/AlekseiDudchenko/data-transfer-service/blob/docs/large-data-transfer-notes/scaling-large-data-transfers-minimal.html">
+          Заметки, на которых основано исследование ↗
+        </a>
+      </div>
+    </section>
+  </div>
+</Layout>

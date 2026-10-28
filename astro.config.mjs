@@ -15,6 +15,8 @@ export default defineConfig({
     "/de": "/ru/",
     "/data-transfers": "/ru/data-transfers/",
     "/de/data-transfers": "/ru/data-transfers/",
+    "/data-transfers/push": "/ru/data-transfers/push/",
+    "/de/data-transfers/push": "/ru/data-transfers/push/",
   },
   integrations: [react(), mdx()],
 });

@@ -4,6 +4,8 @@ Direction: [VISION.md](../VISION.md), agreed 2026-10-28. Active work lives in Gi
 
 ## Status — 2026-10-28
 
+- P2 (#26): the push page — direct push, queue and lag, poison message and DLQ, redelivery and idempotent consumers, consumer groups and backpressure.
+- P1 shipped in PR #28 and is verified in production.
 - P0 shipped in PR #27 and is verified in production ([record](production-validation.md)). P1 (#25) adds scenes 5–8: failures, retries, idempotency, checkpoints and parallel pull.
 
 - `main` (`d560b54`) has the new editorial design and dark theme, plus the earlier lessons and a data-migration prototype. Typecheck, lint, 26 unit tests and the production build pass locally; browser tests were not re-run.
@@ -28,7 +30,14 @@ Direction: [VISION.md](../VISION.md), agreed 2026-10-28. Active work lives in Gi
 
 ## P2 — push-based path
 
-[#26](https://github.com/AlekseiDudchenko/data-system-atlas/issues/26): queue/stream, consumers, lag, dead-letter, replay; later live migration/CDC and reconciliation. Discovery only.
+[#26](https://github.com/AlekseiDudchenko/data-system-atlas/issues/26): queue/stream, consumers, lag, dead-letter, redelivery, consumer groups.
+
+## Next, not scheduled
+
+- English and German translations of both pages, then the language switcher returns.
+- Live migration with CDC (snapshot + change stream + cutover; the retired prototype in `d560b54` is a starting point), multiple sources, mapping, validation and reconciliation.
+- Replay and schema evolution on the push page; transaction boundaries and partial batch failures on the pull page.
+- Learner feedback on the exploration before adding a second one.
 
 ## Infrastructure
 
