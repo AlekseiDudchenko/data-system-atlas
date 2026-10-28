@@ -1,6 +1,6 @@
 # ADR 0003: One key, FIFO replication and retained messages
 
-Status: Accepted · 2026-10-26
+Status: Superseded · 2026-10-28 — the lesson it describes was retired (#20); kept for history.
 
 Context: The first lesson must demonstrate stale reads and recovery without suggesting that it emulates a production database.
 

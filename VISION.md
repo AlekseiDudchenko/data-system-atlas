@@ -19,7 +19,7 @@ The core experience is:
 - Trade-offs matter more than "best practice" labels; added complexity has a cost.
 - Show measurable effects: throughput, duration, backlog, memory, retries, failures, duplicates, correctness.
 - Simulation assumptions are explicit. Model output is never presented as measured database performance.
-- Content and UI copy are original; English first, with German and Russian translations kept in sync.
+- Content and UI copy are original. Russian only for now; English and German return after translation and are then kept in sync.
 - Static and private: no accounts, analytics, persistence, or backend services.
 
 Presentation reference: [samwho — load balancing](https://samwho.dev/load-balancing/).

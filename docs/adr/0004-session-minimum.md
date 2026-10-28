@@ -1,6 +1,6 @@
 # ADR 0004: Session minimum and one pending read
 
-Status: Accepted · 2026-10-26
+Status: Superseded · 2026-10-28 — the lesson it describes was retired (#20); kept for history.
 
 Context: Issue #11 needs a comparison between ordinary follower reads and read-your-writes, including the cost when a replica cannot catch up.
 

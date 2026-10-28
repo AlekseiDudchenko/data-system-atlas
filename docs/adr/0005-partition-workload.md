@@ -1,6 +1,6 @@
 # ADR 0005: Fixed key ownership and equal-cost workload counters
 
-Status: Accepted · 2026-10-26
+Status: Superseded · 2026-10-28 — the lesson it describes was retired (#20); kept for history.
 
 Context: Issue #12 needs a reproducible demonstration that even key placement can still produce a hot partition.
 
