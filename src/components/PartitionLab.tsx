@@ -171,7 +171,7 @@ export default function PartitionLab({ locale = "en" }: { locale?: Locale }) {
                 width="520"
                 height="30"
                 rx="4"
-                fill="#dce6dc"
+                fill="var(--chart-track)"
               />
               <rect
                 x="55"
@@ -179,7 +179,7 @@ export default function PartitionLab({ locale = "en" }: { locale?: Locale }) {
                 width={520 * share}
                 height="30"
                 rx="4"
-                fill={load.queued ? "#a25b13" : "#178176"}
+                fill={load.queued ? "var(--warning-border)" : "var(--link)"}
               />
               <text x="590" y={63 + 70 * id} fill="currentColor">
                 {Math.round(share * 100)}% · {load.queued}

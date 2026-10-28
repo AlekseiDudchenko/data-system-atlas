@@ -35,6 +35,8 @@ After a write is confirmed, your subsequent reads must return a state that inclu
 
 This experiment represents your session as a remembered minimum version. If your save was confirmed as **v1**, your next session read asks for **v1 or newer**. A follower at **v0** cannot satisfy that request yet. The version is a sequence number, not a time in milliseconds.
 
+Here, a session connects one client's successive requests, even when they go to different replicas. In this demo, the minimum lives in browser memory and is lost on reset or reload. In an application, the client or backend would need to remember it and pass it along with later reads; choosing a replica alone does not provide the guarantee.
+
 Below, compare an immediate read with one that requires your write. **Predict first:** if the selected follower is behind, should it return the old name, wait, or send the request elsewhere? Then block its replication link to discover the cost of waiting. Only **Advance one step** moves simulation time; updates normally arrive after two steps.
 
 </section>

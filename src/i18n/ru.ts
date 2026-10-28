@@ -1,4 +1,5 @@
 export default {
+  "Dark theme": "Тёмная тема",
   "LIVE EXPERIMENT / 01": "ИНТЕРАКТИВНЫЙ ЭКСПЕРИМЕНТ / 01",
   "One write. Three perspectives.": "Одна запись. Три точки зрения.",
   Step: "Шаг",

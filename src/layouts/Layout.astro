@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import "../styles/editorial.css";
 import {
   localeFromPath,
   localizedPath,
@@ -14,6 +15,7 @@ interface Props {
   title?: string;
   frontmatter?: { title: string; description?: string };
   description?: string;
+  editorial?: boolean;
 }
 const title =
   Astro.props.title ?? Astro.props.frontmatter?.title ?? "Data Systems Atlas";
@@ -30,6 +32,17 @@ const description =
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      // Apply before paint so saved preferences do not flash the other theme.
+      try {
+        const saved = localStorage.getItem("atlas-theme");
+        if (saved === "light" || saved === "dark") {
+          document.documentElement.dataset.theme = saved;
+        }
+      } catch {
+        /* System preference still works when storage is unavailable. */
+      }
+    </script>
     <meta name="description" content={description} />
     <title>{title} · Data Systems Atlas</title>
     <link rel="canonical" href={canonical} />
@@ -47,7 +60,7 @@ const description =
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
-  <body>
+  <body class:list={{ editorial: Astro.props.editorial }}>
     <a class="skip" href="#main">
       {t("Skip to content")}
     </a>
@@ -64,18 +77,24 @@ const description =
           GitHub ↗
         </a>
       </nav>
-      <nav class="language-switcher" aria-label={t("Language")}>
-        {locales.map((language) => (
-          <a
-            href={localizedPath(language, Astro.url.pathname)}
-            lang={language}
-            hreflang={language}
-            aria-current={language === locale ? "page" : undefined}
-          >
-            {languageNames[language]}
-          </a>
-        ))}
-      </nav>
+      <div class="header-preferences">
+        <nav class="language-switcher" aria-label={t("Language")}>
+          {locales.map((language) => (
+            <a
+              href={localizedPath(language, Astro.url.pathname)}
+              lang={language}
+              hreflang={language}
+              aria-current={language === locale ? "page" : undefined}
+            >
+              {languageNames[language]}
+            </a>
+          ))}
+        </nav>
+        <button class="theme-toggle" type="button" aria-pressed="false" hidden>
+          <span aria-hidden="true">◐</span>
+          {t("Dark theme")}
+        </button>
+      </div>
     </header>
     <main id="main" tabindex="-1">
       <slot />
@@ -86,3 +105,29 @@ const description =
     </footer>
   </body>
 </html>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>(".theme-toggle");
+  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+  const isDark = () =>
+    document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : systemTheme.matches;
+  const syncToggle = () =>
+    toggle?.setAttribute("aria-pressed", String(isDark()));
+  if (toggle) {
+    syncToggle();
+    toggle.hidden = false;
+    toggle.addEventListener("click", () => {
+      const theme = isDark() ? "light" : "dark";
+      document.documentElement.dataset.theme = theme;
+      try {
+        localStorage.setItem("atlas-theme", theme);
+      } catch {
+        /* Optional storage. */
+      }
+      syncToggle();
+    });
+    systemTheme.addEventListener("change", syncToggle);
+  }
+</script>

@@ -53,7 +53,9 @@ test("keyboard entry, full values, responsive layout, and navigation", async ({
   await expect(page.getByText("Skip to content")).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("#main")).toBeFocused();
-  await page.getByRole("link", { name: "Start with replication" }).click();
+  await page
+    .getByRole("link", { name: "Replication and Stale Reads", exact: true })
+    .click();
   await expect(page.getByLabel("1 / Write to the leader")).toBeEnabled();
   await page.getByLabel("1 / Write to the leader").focus();
   await page.keyboard.type("Keyboard value");

@@ -40,7 +40,7 @@ export default function ReplicationTopology({
             <path
               d={`M 290 125 Q 385 125 475 ${i === 0 ? 60 : 190}`}
               fill="none"
-              stroke={state.blocked[id] ? "#b45309" : "#178176"}
+              stroke={state.blocked[id] ? "var(--blocked)" : "var(--link)"}
               strokeWidth="2"
               strokeDasharray={state.blocked[id] ? "5 6" : undefined}
               markerEnd="url(#arrow)"
@@ -52,8 +52,8 @@ export default function ReplicationTopology({
             </text>
           </g>
         ))}
-        <rect x="25" y="75" width="265" height="100" rx="14" fill="#113d3a" />
-        <text x="48" y="110" fill="#95ebd4">
+        <rect x="25" y="75" width="265" height="100" rx="14" fill="var(--leader)" />
+        <text x="48" y="110" fill="var(--leader-label)">
           {t("LEADER · v")}
           {state.leader.version}
         </text>
@@ -70,16 +70,16 @@ export default function ReplicationTopology({
               width="275"
               height="100"
               rx="14"
-              fill="#fff"
-              stroke="#a5bcb3"
+              fill="var(--surface)"
+              stroke="var(--node-border)"
             />
-            <text x="500" y={i * 130 + 45} fill="#294b43">
+            <text x="500" y={i * 130 + 45} fill="var(--text)">
               {t("FOLLOWER") + " "}
               {id}
               {" " + t("· v")}
               {state.followers[id].version}
             </text>
-            <text x="500" y={i * 130 + 81} fill="#172f2b">
+            <text x="500" y={i * 130 + 81} fill="var(--text)">
               {state.followers[id].value.length > 20
                 ? `${state.followers[id].value.slice(0, 20)}…`
                 : state.followers[id].value}

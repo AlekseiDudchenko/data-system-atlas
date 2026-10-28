@@ -1,12 +1,38 @@
 :root {
   font-family: "DM Sans", system-ui, sans-serif;
-  color: #183d35;
-  background: #f7f8f2;
+  color: var(--text);
+  background: var(--page);
   font-synthesis: none;
   line-height: 1.6;
+  color-scheme: light;
+  --text: #183d35;
+  --page: #f7f8f2;
   --green: #113d3a;
   --muted: #536960;
   --border: #d4ded3;
+  --button-hover: #235e51;
+  --button-text: #ffffff;
+  --focus: #a14b13;
+  --input-border: #809b8e;
+  --accent: #397958;
+  --topic: #e3eedf;
+  --topic-border: #70967b;
+  --lab: #eef3e9;
+  --lab-border: #b9cdb9;
+  --badge: #dce9d4;
+  --success: #dcebdc;
+  --success-border: #3c7555;
+  --warning: #fff0d5;
+  --warning-border: #a25b13;
+  --warning-text: #71410f;
+  --prose: #3e584d;
+  --surface: #ffffff;
+  --node-border: #a5bcb3;
+  --link: #178176;
+  --blocked: #b45309;
+  --chart-track: #dce6dc;
+  --leader: #113d3a;
+  --leader-label: #95ebd4;
 }
 * {
   box-sizing: border-box;
@@ -28,7 +54,7 @@ button,
   border: 1px solid var(--green);
   border-radius: 7px;
   background: var(--green);
-  color: white;
+  color: var(--button-text);
   padding: 11px 17px;
   cursor: pointer;
   text-decoration: none;
@@ -39,7 +65,7 @@ button,
 }
 button:hover,
 .button:hover {
-  background: #235e51;
+  background: var(--button-hover);
 }
 button:disabled {
   opacity: 0.5;
@@ -50,15 +76,15 @@ button.secondary {
   color: var(--green);
 }
 :focus-visible {
-  outline: 3px solid #a14b13;
+  outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
 input,
 select {
-  border: 1px solid #809b8e;
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   padding: 10px 12px;
-  background: white;
+  background: var(--surface);
   color: var(--green);
   min-width: 0;
 }
@@ -90,7 +116,7 @@ h3 {
 }
 em {
   font-style: normal;
-  color: #397958;
+  color: var(--accent);
 }
 .site-header {
   max-width: 1320px;
@@ -111,7 +137,7 @@ em {
 }
 .brand-icon {
   font-size: 2rem;
-  color: #4c8058;
+  color: var(--accent);
 }
 nav {
   display: flex;
@@ -131,7 +157,7 @@ main {
   letter-spacing: 0.14em;
   font-size: 0.68rem;
   font-weight: 700;
-  color: #42735b;
+  color: var(--accent);
 }
 .hero {
   padding: 90px 0 85px;
@@ -180,8 +206,8 @@ main {
   color: var(--muted);
 }
 .topic.available {
-  background: #e3eedf;
-  border-color: #70967b;
+  background: var(--topic);
+  border-color: var(--topic-border);
 }
 .topic a {
   display: block;
@@ -219,8 +245,8 @@ main {
   font-size: 0.73rem;
 }
 .lab {
-  background: #eef3e9;
-  border: 1px solid #b9cdb9;
+  background: var(--lab);
+  border: 1px solid var(--lab-border);
   border-radius: 16px;
   padding: 30px;
   box-shadow: 0 15px 50px #23482c06;
@@ -235,7 +261,7 @@ main {
 }
 .step,
 .badge {
-  background: #dce9d4;
+  background: var(--badge);
   border-radius: 30px;
   padding: 7px 14px;
   font-size: 0.8rem;
@@ -317,16 +343,16 @@ small {
   font-size: 0.84rem;
 }
 .read-result {
-  background: #dcebdc;
-  border-left: 3px solid #3c7555;
+  background: var(--success);
+  border-left: 3px solid var(--success-border);
   padding: 15px 20px;
   font-size: 0.91rem;
   overflow-wrap: anywhere;
 }
 .read-result.stale {
-  background: #fff0d5;
-  border-color: #a25b13;
-  color: #71410f;
+  background: var(--warning);
+  border-color: var(--warning-border);
+  color: var(--warning-text);
 }
 .session-actions {
   margin-top: 12px;
@@ -397,7 +423,7 @@ small {
   display: flex;
   flex-wrap: wrap;
   gap: 6px 14px;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 7px;
   padding: 10px;
@@ -430,7 +456,7 @@ small {
 .prose-grid p,
 .prose-grid li {
   font-size: 0.94rem;
-  color: #3e584d;
+  color: var(--prose);
 }
 .prose-grid ul {
   padding-left: 20px;
@@ -450,7 +476,7 @@ footer {
   top: -100px;
   z-index: 10;
   padding: 12px;
-  background: white;
+  background: var(--surface);
 }
 .skip:focus {
   top: 0;
@@ -590,4 +616,102 @@ footer {
 h1 {
   overflow-wrap: anywhere;
   hyphens: auto;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --text: #e0ebe5;
+  --page: #101a17;
+  --green: #9bd6bb;
+  --muted: #adc0b5;
+  --border: #3b5146;
+  --button-hover: #b5e6ce;
+  --button-text: #10251c;
+  --focus: #ffc184;
+  --input-border: #708f7e;
+  --accent: #99d6af;
+  --topic: #20382b;
+  --topic-border: #567b62;
+  --lab: #192a22;
+  --lab-border: #496653;
+  --badge: #2d4635;
+  --success: #244432;
+  --success-border: #91d4a9;
+  --warning: #45331c;
+  --warning-border: #eab66e;
+  --warning-text: #ffdaa5;
+  --prose: #c0d1c6;
+  --surface: #203229;
+  --node-border: #708f7e;
+  --link: #73cdbf;
+  --blocked: #edb36f;
+  --chart-track: #3b5146;
+  --leader: #113d3a;
+  --leader-label: #95ebd4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --text: #e0ebe5;
+    --page: #101a17;
+    --green: #9bd6bb;
+    --muted: #adc0b5;
+    --border: #3b5146;
+    --button-hover: #b5e6ce;
+    --button-text: #10251c;
+    --focus: #ffc184;
+    --input-border: #708f7e;
+    --accent: #99d6af;
+    --topic: #20382b;
+    --topic-border: #567b62;
+    --lab: #192a22;
+    --lab-border: #496653;
+    --badge: #2d4635;
+    --success: #244432;
+    --success-border: #91d4a9;
+    --warning: #45331c;
+    --warning-border: #eab66e;
+    --warning-text: #ffdaa5;
+    --prose: #c0d1c6;
+    --surface: #203229;
+    --node-border: #708f7e;
+    --link: #73cdbf;
+    --blocked: #edb36f;
+    --chart-track: #3b5146;
+    --leader: #113d3a;
+    --leader-label: #95ebd4;
+  }
+}
+
+.header-preferences {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+.theme-toggle {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--input-border);
+  padding: 7px 11px;
+  font-size: 0.8rem;
+  gap: 8px;
+}
+.theme-toggle:hover {
+  background: var(--badge);
+}
+.theme-toggle[aria-pressed="true"] {
+  background: var(--badge);
+}
+.theme-toggle[hidden] {
+  display: none;
+}
+@media (max-width: 600px) {
+  .header-preferences {
+    width: 100%;
+  }
+  .header-preferences .language-switcher {
+    width: auto;
+  }
 }

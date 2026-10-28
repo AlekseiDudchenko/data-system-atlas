@@ -35,6 +35,8 @@ Nach einem bestätigten Schreibvorgang müssen Ihre nachfolgenden Lesevorgänge 
 
 Dieses Experiment stellt die Sitzung als gespeicherte Mindestversion dar. Wurde Ihr Speichern als **v1** bestätigt, verlangt Ihr nächstes Sitzungslesen **v1 oder neuer**. Ein Replikat bei **v0** kann die Anfrage noch nicht erfüllen. Die Version ist eine Sequenznummer, keine Zeit in Millisekunden.
 
+Eine Sitzung verbindet hier die aufeinanderfolgenden Anfragen eines Clients, auch wenn sie an verschiedene Replikate gehen. In dieser Demo liegt die Mindestversion im Browserspeicher und geht beim Zurücksetzen oder Neuladen verloren. In einer Anwendung müsste der Client oder das Backend sie speichern und bei späteren Leseanfragen mitgeben; die Wahl eines Replikats allein bietet diese Garantie nicht.
+
 Vergleichen Sie sofortiges Lesen mit einem Lesevorgang, der Ihre Schreibversion verlangt. **Zuerst vorhersagen:** Soll ein zurückliegendes Replikat den alten Namen liefern, warten oder die Anfrage weiterleiten? Blockieren Sie dann seine Replikation, um die Kosten des Wartens zu entdecken. Nur **Einen Schritt weiter** bewegt die Simulationszeit; Updates kommen normalerweise nach zwei Schritten an.
 
 </section>

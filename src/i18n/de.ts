@@ -1,4 +1,5 @@
 export default {
+  "Dark theme": "Dunkles Design",
   "LIVE EXPERIMENT / 01": "INTERAKTIVES EXPERIMENT / 01",
   "One write. Three perspectives.": "Ein Schreibvorgang. Drei Perspektiven.",
   Step: "Schritt",
