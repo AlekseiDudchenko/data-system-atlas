@@ -98,6 +98,81 @@ test("lazy reading completes; batches cut round trips", async ({ page }) => {
   await expect(page.getByRole("status")).toContainText("Готово к запуску");
 });
 
+test("retries finish the copy but a lost acknowledgement duplicates a batch", async ({
+  page,
+}) => {
+  await page.goto("/ru/data-transfers/");
+  await page
+    .getByRole("button", { name: "Сеть иногда рвётся.", exact: true })
+    .click();
+  await run(page);
+  await expect(page.getByRole("status")).toHaveText(
+    /Перенос прерван на пакете 121 .* Уникальных записей: 120\s000\./,
+  );
+  await page.getByLabel("Повторять при ошибке").check();
+  await run(page);
+  await expect(page.getByRole("status")).toHaveText(
+    /Готово .* Уникальных записей: 1\s000\s000\. Дубликатов: 1\s000\./,
+  );
+  await expect(page.locator(".failure-log")).toContainText(
+    "Пакет 371: записан, но подтверждение потеряно",
+  );
+});
+
+test("upserts remove duplicates; checkpoint order decides between replay and loss", async ({
+  page,
+}) => {
+  await page.goto("/ru/data-transfers/");
+  await page
+    .getByRole("button", { name: "Повтор не должен дублировать.", exact: true })
+    .click();
+  await run(page);
+  await expect(page.getByRole("status")).toHaveText(/Дубликатов: 642\s000\.$/);
+  await page
+    .getByLabel("Способ записи", { exact: true })
+    .selectOption("upsert");
+  await run(page);
+  await expect(page.getByRole("status")).not.toContainText("Дубликатов");
+  await expect(page.getByRole("status")).toContainText("Переписано повторно");
+
+  await page
+    .getByRole("button", { name: "Запомним, где остановились.", exact: true })
+    .click();
+  await run(page);
+  await expect(page.getByRole("status")).toHaveText(
+    /Уникальных записей: 1\s000\s000\. Переписано повторно: 2\s000\.$/,
+  );
+  await page
+    .getByLabel("Checkpoint", { exact: true })
+    .selectOption("before-write");
+  await run(page);
+  await expect(page.getByRole("status")).toContainText("Пропущено: 1");
+  await expect(page.locator(".failure-log")).toContainText(
+    "Перезапуск с пакета 642",
+  );
+});
+
+test("more readers help until the target saturates or one range dominates", async ({
+  page,
+}) => {
+  await page.goto("/ru/data-transfers/");
+  await page
+    .getByRole("button", { name: "Несколько читателей.", exact: true })
+    .click();
+  const workers = page.getByLabel("Читателей", { exact: true });
+  await expect(workers).toHaveValue("4");
+  await run(page);
+  await expect(page.getByRole("status")).toContainText("Ускорение ×4");
+  await workers.selectOption("8");
+  await run(page);
+  await expect(page.getByRole("status")).toContainText("Ускорение ×4,3");
+  await workers.selectOption("16");
+  await page.getByLabel("Неравномерные данные").check();
+  await run(page);
+  await expect(page.getByRole("status")).toContainText("Ускорение ×1,7");
+  await expect(page.locator(".parallel-lanes li")).toHaveCount(16);
+});
+
 test("the animation shows a run in progress before it finishes", async ({
   page,
 }) => {
@@ -122,10 +197,22 @@ test("pages are accessible in both themes and reflow", async ({ page }) => {
     for (const route of ["/ru/", "/ru/data-transfers/"]) {
       await page.goto(route);
       if (route !== "/ru/") {
-        await page
-          .getByRole("button", { name: "Теперь — миллион.", exact: true })
-          .click();
-        await run(page);
+        for (const scene of [
+          "Теперь — миллион.",
+          "Запомним, где остановились.",
+          "Несколько читателей.",
+        ]) {
+          await page.getByRole("button", { name: scene, exact: true }).click();
+          await run(page);
+          expect(
+            (
+              await new AxeBuilder({ page })
+                .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+                .analyze()
+            ).violations,
+          ).toEqual([]);
+          await noOverflow(page);
+        }
       }
       expect(
         (
@@ -156,6 +243,10 @@ test("scenes and model boundaries remain readable without JavaScript", async ({
     "Теперь — миллион.",
     "Читаем лениво.",
     "Пишем пакетами.",
+    "Сеть иногда рвётся.",
+    "Повтор не должен дублировать.",
+    "Запомним, где остановились.",
+    "Несколько читателей.",
   ]) {
     await expect(
       page.getByRole("heading", { name: heading, exact: true }),

@@ -6,7 +6,7 @@ Live site: [Data Systems Atlas](https://data-systems-atlas.dudchenko.org/).
 
 ## The exploration
 
-`/ru/data-transfers/` — **Scaling large data transfers.** Copy a table from one database to another: a sequential script that loads everything and inserts one row at a time, then a million records that run it out of memory, lazy reading with a cursor, and batched inserts. Run each step, change the record count and batch size, and compare duration, throughput, round trips, memory and how long the source cursor stays open. All numbers come from an explicit cost model ([ADR 0006](docs/adr/0006-transfer-cost-model.md)); they are estimates, not benchmarks.
+`/ru/data-transfers/` — **Scaling large data transfers.** Copy a table from one database to another: a sequential script that loads everything and inserts one row at a time, then a million records that run it out of memory, lazy reading with a cursor, and batched inserts; then dropped connections and retries, a lost acknowledgement that duplicates a batch, UPSERT, checkpoints saved after or before the write, and several readers over key ranges. Run each step, change its decisions, and compare duration, round trips, memory, duplicates, lost records and speedup. All numbers come from explicit models ([ADR 0006](docs/adr/0006-transfer-cost-model.md), [ADR 0007](docs/adr/0007-failure-and-parallel-models.md)); they are estimates, not benchmarks.
 
 The site is Russian only for now. `/`, `/de/` and `/data-transfers/` redirect to the Russian pages; English and German return after translation.
 

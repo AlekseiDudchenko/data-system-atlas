@@ -24,7 +24,7 @@ const locale = localeFromPath(Astro.url.pathname);
     <section class="story-footnotes">
       <details>
         <summary>{c.boundaries}</summary>
-        <p>{c.limits}</p>
+        {c.limits.map((paragraph) => <p>{paragraph}</p>)}
       </details>
       <div class="story-sources">
         <h2>{c.sources}</h2>

@@ -1,4 +1,12 @@
-# Production release — 2026-10-27
+# Production release — 2026-10-28: first exploration (#27)
+
+- Merged application commit: `ee7e1029130d5a7b9408a25d632810fa421fd578` (squash of PR #27), deployed automatically from `main`.
+- HTTPS checks on https://data-systems-atlas.dudchenko.org/: `/ru/` and `/ru/data-transfers/` return 200; `/`, `/de/` and `/data-transfers/` return 302 to the Russian pages; retired lesson and migration URLs (with and without a trailing slash, all locales) return 301 to `/ru/`; `/favicon.svg` returns 200; security headers unchanged.
+- Smoke scenario in Chromium against production, desktop (1280×900) and phone (390×844) with reduced motion: scene 1 «Готово: 1 000 записей за 2,1 с.», scene 2 «Нехватка памяти через 2,6 с … Ничего не записано.», scene 4 «Готово: 1 000 000 записей за 59 с.»; no page errors, no horizontal overflow.
+- Before merge, locally: typecheck, lint, Prettier, 13 unit tests, build and 20 desktop/mobile Playwright tests passed. Branch preview deployments are not enabled for the Pages project, so the pre-merge preview was shared as a private claude.ai artifact.
+- Not exercised: rollback, Safari/Firefox, assistive technology beyond axe.
+
+# Production release — 2026-10-27: initial launch (historical)
 
 Cloudflare Pages project: `data-systems-atlas`, connected to `AlekseiDudchenko/data-system-atlas`, production branch `main`. Automatic deployments are enabled through the existing GitHub integration.
 
