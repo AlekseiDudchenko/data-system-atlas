@@ -7,3 +7,4 @@ test-results/
 .idea/
 *.iml
 .DS_Store
+/*.png
