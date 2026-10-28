@@ -23,11 +23,11 @@ Astro renders the home page and the exploration at build time. The exploration h
 
 ## Model contract
 
-`estimateTransfer(plan)` returns a complete estimate for a plan of records, eager or lazy reading and batch size: outcome, duration, round trips, records read and written, memory needed, how long the source cursor stays open and throughput. `progressAt(estimate, t)` returns the visible state at modelled time `t`. The UI animates by sampling `progressAt` over a fixed 2.6 s, or jumps to the end when reduced motion is preferred. The model imports nothing from React, the DOM, timers or randomness. Constants and their consequences are in [ADR 0006](docs/adr/0006-transfer-cost-model.md).
+Three pure models back the eight scenes. `estimateTransfer(plan)` returns a complete estimate for a plan of records, eager or lazy reading and batch size: outcome, duration, round trips, records read and written, memory needed, how long the source cursor stays open and throughput. `progressAt(estimate, t)` returns the visible state at modelled time `t`. The UI animates by sampling `progressAt` over a fixed 2.6 s, or jumps to the end when reduced motion is preferred. The model imports nothing from React, the DOM, timers or randomness. Constants and their consequences are in [ADR 0006](docs/adr/0006-transfer-cost-model.md). `simulateReliability(plan)` returns timed events for 1,000 batches with scripted failures and `reliabilityAt(run, t)` replays them; `simulateParallel(plan)` schedules readers over key ranges and `parallelAt(run, t)` reports their progress ([ADR 0007](docs/adr/0007-failure-and-parallel-models.md)). On desktop the workspace stays within the viewport and scrolls on its own, so reaching its bottom never scrolls to another scene.
 
 ## Content and extension
 
-Each scene fixes the strategy (eager/lazy, per-record/batched) and its default controls; changing a control or scene resets the run. A scene compares its estimate with the previous decision at the same record count. New scenes extend `plans()` in the explorer and the model only when they need a new mechanism; no generic simulation engine exists until a second exploration needs one.
+Each scene owns its lab and default controls; changing a control or scene resets the run. Scenes compare the current choice with the previous decision (scenes 1–4, 8) or with the other option of the decision they introduce (scenes 5–7). New scenes extend `plans()` in the explorer and the model only when they need a new mechanism; no generic simulation engine exists until a second exploration needs one.
 
 ## Quality and operations
 

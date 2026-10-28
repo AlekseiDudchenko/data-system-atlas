@@ -265,8 +265,13 @@
 .story-workspace {
   position: sticky;
   top: 28px;
-  margin-top: 50px;
-  padding-bottom: 20px;
+  /* Stay within the viewport: reaching the bottom must not scroll the scenes. */
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Room for focus outlines, which the scroll container would clip. */
+  padding: 8px 8px 20px;
+  margin: 42px -8px 0;
   min-width: 0;
   scroll-margin-top: 20px;
 }
@@ -292,8 +297,9 @@
   color: var(--text);
   background: var(--story-row);
 }
-.workspace-mode {
-  margin-left: auto;
+.lab-mode {
+  margin: 12px 0 0;
+  text-align: right;
   font-size: 11px;
   color: var(--story-accent);
 }
@@ -552,6 +558,198 @@
 .story-compare td:last-child {
   color: var(--text);
 }
+.story-counters {
+  flex-wrap: wrap;
+  row-gap: 14px;
+}
+.editorial .story-field label,
+.editorial .story-check {
+  font-weight: 400;
+}
+.editorial .story-field label {
+  font-size: 10px;
+  color: var(--muted);
+}
+.story-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+  min-height: 34px;
+}
+.editorial .story-check input {
+  accent-color: var(--story-accent);
+  width: 16px;
+  height: 16px;
+}
+.story-failures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  border: 0;
+  padding: 0;
+  margin: 14px 0 0;
+  min-width: 0;
+}
+.story-failures legend {
+  font-size: 10px;
+  color: var(--muted);
+  padding: 0;
+  margin-bottom: 4px;
+}
+.failure-figure,
+.parallel-figure {
+  margin: 22px 0 8px;
+}
+.failure-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+}
+.failure-chips span {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 9px;
+  background: var(--surface);
+}
+.failure-title {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 18px 0 8px;
+}
+.failure-timeline {
+  display: block;
+  width: 100%;
+  height: 52px;
+}
+.batch-empty {
+  fill: var(--story-row);
+}
+.batch-written {
+  fill: var(--muted);
+}
+.batch-repeated {
+  fill: var(--story-accent);
+}
+.batch-missing {
+  fill: var(--page);
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-dasharray: 3 2;
+  vector-effect: non-scaling-stroke;
+}
+.failure-mark {
+  fill: var(--text);
+}
+.failure-cursor {
+  fill: var(--text);
+}
+.failure-legend {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.failure-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 10px;
+  border-radius: 2px;
+}
+.swatch.batch-empty {
+  background: var(--story-row);
+}
+.swatch.batch-written {
+  background: var(--muted);
+}
+.swatch.batch-repeated {
+  background: var(--story-accent);
+}
+.swatch.batch-missing {
+  background: var(--page);
+  border: 1px dashed var(--text);
+}
+.swatch-mark {
+  font-size: 9px;
+  color: var(--text);
+}
+.failure-log {
+  margin-top: 16px;
+  font-size: 12px;
+}
+.failure-log h3 {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+.failure-log p {
+  margin: 0;
+  color: var(--muted);
+}
+.failure-log ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.failure-log li {
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+}
+.failure-log li span {
+  display: inline-block;
+  min-width: 72px;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px;
+}
+.parallel-lanes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 5px;
+}
+.parallel-lanes li {
+  display: grid;
+  grid-template-columns: 92px 1fr 104px;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+}
+.lane-name {
+  color: var(--muted);
+}
+.lane-track {
+  display: block;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--story-row);
+  overflow: hidden;
+}
+.lane-fill {
+  display: block;
+  height: 100%;
+  background: var(--story-accent);
+}
+.lane-count {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
 @media (max-width: 1000px) {
   .editorial .main-nav {
     display: none;
@@ -592,13 +790,20 @@
   }
   .story-workspace {
     position: static;
-    margin-top: 20px;
+    max-height: none;
+    overflow: visible;
+    margin: 20px 0 0;
+    padding: 0 0 20px;
   }
   .story-footnotes {
     margin-top: 40px;
   }
 }
 @media (max-width: 600px) {
+  .parallel-lanes li {
+    grid-template-columns: 76px 1fr 92px;
+    gap: 8px;
+  }
   .transfer-wide {
     display: none;
   }
@@ -689,7 +894,7 @@
   .story-counters {
     gap: 28px;
   }
-  .workspace-mode {
+  .lab-mode {
     font-size: 10px;
   }
   .story-status span {

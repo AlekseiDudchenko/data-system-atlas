@@ -4,6 +4,8 @@ Direction: [VISION.md](../VISION.md), agreed 2026-10-28. Active work lives in Gi
 
 ## Status — 2026-10-28
 
+- P0 shipped in PR #27 and is verified in production ([record](production-validation.md)). P1 (#25) adds scenes 5–8: failures, retries, idempotency, checkpoints and parallel pull.
+
 - `main` (`d560b54`) has the new editorial design and dark theme, plus the earlier lessons and a data-migration prototype. Typecheck, lint, 26 unit tests and the production build pass locally; browser tests were not re-run.
 - Decisions: keep the headline "How data systems work"; Scaling Large Data Transfers is the first and only exploration; retire the old lessons and the migration prototype; no "How it works" block and no About page; the site is Russian only for now (`/`, `/de/` redirect to `/ru/`).
 - GitHub Actions are unavailable (#16). Validate locally and record which checks ran.
