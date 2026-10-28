@@ -1,0 +1,21 @@
+# Retired lessons and the migration prototype (2026-10-28).
+/replication/* /ru/ 301
+/partitioning/* /ru/ 301
+/migration /ru/ 301
+/migration/* /ru/ 301
+/de/replication/* /ru/ 301
+/de/partitioning/* /ru/ 301
+/de/migration /ru/ 301
+/de/migration/* /ru/ 301
+/ru/replication/* /ru/ 301
+/ru/partitioning/* /ru/ 301
+/ru/migration /ru/ 301
+/ru/migration/* /ru/ 301
+# Russian only for now; English and German return after translation.
+/ /ru/ 302
+/de /ru/ 302
+/de/ /ru/ 302
+/data-transfers /ru/data-transfers/ 302
+/data-transfers/ /ru/data-transfers/ 302
+/de/data-transfers /ru/data-transfers/ 302
+/de/data-transfers/ /ru/data-transfers/ 302

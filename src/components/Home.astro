@@ -1,13 +1,16 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { localeFromPath, localizedPath, translator } from "../i18n";
-import { homeCopy } from "../content/home";
-import MigrationDiagram from "./MigrationDiagram";
-import { initialMigration } from "../simulation/migration";
+import { localeFromPath, localizedPath } from "../i18n";
+import { homeCopy as c } from "../content/home";
+import TransferDiagram from "./TransferDiagram";
+import { estimateTransfer, progressAt } from "../simulation/transfer";
 const locale = localeFromPath(Astro.url.pathname);
-const t = translator(locale);
-const c = homeCopy[locale];
-const preview = initialMigration(1);
+const preview = estimateTransfer({
+  records: 1_000_000,
+  reading: "lazy",
+  batchSize: 1_000,
+});
+const previewProgress = progressAt(preview, preview.durationMs * 0.42);
 ---
 
 <Layout title={c.title} description={c.intro} editorial>
@@ -19,47 +22,30 @@ const preview = initialMigration(1);
     <section
       id="atlas"
       class="featured-exploration"
-      aria-labelledby="migration-title"
+      aria-labelledby="exploration-title"
     >
       <div class="featured-copy">
         <p class="story-kicker">{c.index}</p>
-        <h2 id="migration-title">{c.migration}</h2>
+        <h2 id="exploration-title">{c.name}</h2>
         <p class="featured-question">{c.question}</p>
         <p class="featured-description">{c.description}</p>
-        <a class="explore-link" href={localizedPath(locale, "/migration/")}>
+        <a
+          class="explore-link"
+          href={localizedPath(locale, "/data-transfers/")}
+        >
           {c.open}
           <span aria-hidden="true">↗</span>
         </a>
       </div>
       <a
         class="featured-visual"
-        href={localizedPath(locale, "/migration/")}
+        href={localizedPath(locale, "/data-transfers/")}
         aria-label={c.open}
         tabindex="-1"
       >
-        <MigrationDiagram state={preview} locale={locale} preview />
+        <TransferDiagram estimate={preview} progress={previewProgress} />
         <span class="visual-caption">{c.path}</span>
       </a>
-    </section>
-    <section class="atlas-more" aria-labelledby="more-title">
-      <h2 id="more-title">{c.more}</h2>
-      <div class="exploration-list">
-        <a href={localizedPath(locale, "/replication/stale-reads")}>
-          <span aria-hidden="true">02</span>
-          <strong>{t("Replication and Stale Reads")}</strong>
-          <span aria-hidden="true">↗</span>
-        </a>
-        <a href={localizedPath(locale, "/replication/read-your-writes")}>
-          <span aria-hidden="true">03</span>
-          <strong>{t("Read Your Writes")}</strong>
-          <span aria-hidden="true">↗</span>
-        </a>
-        <a href={localizedPath(locale, "/partitioning/hotspots")}>
-          <span aria-hidden="true">04</span>
-          <strong>{t("Partitioning and Hotspots")}</strong>
-          <span aria-hidden="true">↗</span>
-        </a>
-      </div>
     </section>
   </div>
 </Layout>
