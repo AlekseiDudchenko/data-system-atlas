@@ -1,3 +1,9 @@
+# Production releases — 2026-10-28: failures and parallel pull (#28), push page (#29)
+
+- #28 (`7715881`): on https://data-systems-atlas.dudchenko.org/ru/data-transfers/ in Chromium at 1280×900 and 390×844 with reduced motion — scene 5 «Перенос прерван на пакете 121 через 8,1 с», scene 7 with the checkpoint before the write «… Пропущено: 1 000.», scene 8 with eight readers «Ускорение ×4,3»; no page errors, no horizontal overflow.
+- #29 (`7c20406`): `/ru/data-transfers/push/` returns 200 and `/data-transfers/push/` redirects to it (302). Reached from the pull page's link at both viewports; scenes 1–5 report 14 000 lost, recovery in 29,7 с, a lag that never recovers behind the poison message, 1 700 duplicates and 20 000 lost with four consumers; no page errors, no horizontal overflow.
+- Before each merge, locally: typecheck, lint, Prettier, unit tests (28, then 36) and desktop/mobile Playwright (26, then 40) passed.
+
 # Production release — 2026-10-28: first exploration (#27)
 
 - Merged application commit: `ee7e1029130d5a7b9408a25d632810fa421fd578` (squash of PR #27), deployed automatically from `main`.

@@ -2,14 +2,10 @@
 
 Direction: [VISION.md](../VISION.md), agreed 2026-10-28. Active work lives in GitHub Issues; this file keeps the order and the decisions behind it. Build one strong exploration before extracting shared abstractions.
 
-## Status — 2026-10-28
+## Status — 2026-10-29
 
-- P2 (#26): the push page — direct push, queue and lag, poison message and DLQ, redelivery and idempotent consumers, consumer groups and backpressure.
-- P1 shipped in PR #28 and is verified in production.
-- P0 shipped in PR #27 and is verified in production ([record](production-validation.md)). P1 (#25) adds scenes 5–8: failures, retries, idempotency, checkpoints and parallel pull.
-
-- `main` (`d560b54`) has the new editorial design and dark theme, plus the earlier lessons and a data-migration prototype. Typecheck, lint, 26 unit tests and the production build pass locally; browser tests were not re-run.
-- Decisions: keep the headline "How data systems work"; Scaling Large Data Transfers is the first and only exploration; retire the old lessons and the migration prototype; no "How it works" block and no About page; the site is Russian only for now (`/`, `/de/` redirect to `/ru/`).
+- Shipped and verified in production ([record](production-validation.md)): P0 in PR #27 (scenes 1–4 and the home page), P1 in PR #28 (scenes 5–8: failures, retries, idempotency, checkpoints, parallel pull), P2 in PR #29 (the push page). Issues #20–#26 are closed.
+- Decisions: keep the headline "How data systems work"; Scaling Large Data Transfers is the first and only exploration; the earlier lessons and the migration prototype are retired; no "How it works" block and no About page; the site is Russian only for now (`/`, `/de/` redirect to `/ru/`).
 - GitHub Actions are unavailable (#16). Validate locally and record which checks ran.
 
 ## P0 — first exploration
