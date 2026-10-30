@@ -12,7 +12,7 @@ Live site: [Data Systems Atlas](https://data-systems-atlas.dudchenko.org/).
 
 Both transfer models share a persistent model switcher, named steps, previous/next links and direct URLs such as `/ru/data-transfers/#checkpoint` and `/ru/data-transfers/push/#redelivery`. Desktop scrolling selects the matching experiment; on mobile a native selector chooses the situation. Refresh and browser history restore the selection, and the outline and prose remain readable without JavaScript. Legacy `#scene-N` links are normalized after hydration.
 
-The site is Russian only for now. `/`, `/de/`, `/data-transfers/` and `/data-transfers/push/` redirect to the Russian pages; English and German return after translation.
+English is published at `/`, `/data-transfers/` and `/data-transfers/push/`; Russian remains at `/ru/` and matching `/ru/` paths. The language switcher preserves the model and current scene fragment. German entry points redirect to Russian until translated.
 
 ## Development
 
@@ -48,7 +48,7 @@ Stack: Astro static pages, strict TypeScript, React islands, SVG, Vitest, Playwr
 
 ## Languages
 
-Russian copy lives in `src/content/` (exploration and home) and `src/i18n/ru.ts` (layout strings). `publishedLocales` in `src/i18n/index.ts` lists the languages with built pages; the language switcher appears again when it has more than one entry. Numbers, durations and sizes are formatted by `src/i18n/format.ts`, including Russian plural forms.
+Russian copy lives in `src/content/`; its complete English counterpart is in `src/content/en/`. Shared navigation copy is in `src/content/localized.ts`, and layout translations are in `src/i18n/ru.ts`. `publishedLocales` lists English and Russian. React islands receive an explicit locale through context, including server rendering, diagrams, controls, event logs and comparison tables. Numbers, durations, sizes and plural forms follow the selected locale. English terminology uses cursor-based reads, batch writes, exponential backoff, idempotent writes, checkpointing, consumer lag, committed offsets, dead-letter queues and at-least-once delivery.
 
 ## Independence and licensing
 

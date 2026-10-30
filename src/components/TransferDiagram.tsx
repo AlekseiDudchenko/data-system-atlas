@@ -1,5 +1,8 @@
 import { useId } from "react";
-import { fill, transferCopy as c } from "../content/transfers";
+import { fill } from "../content/transfers";
+import { getTransferCopy } from "../content/localized";
+import { useLocale } from "../i18n/react";
+import type { Locale } from "../i18n";
 import { formatBytes, formatNumber, plural } from "../i18n/format";
 import type {
   TransferEstimate,
@@ -47,6 +50,7 @@ const tall: Geometry = {
 };
 
 type Props = {
+  locale?: Locale;
   estimate: TransferEstimate;
   progress: TransferProgress;
   running?: boolean;
@@ -63,12 +67,16 @@ export default function TransferDiagram(props: Props) {
 }
 
 function Diagram({
+  locale: explicitLocale,
   estimate,
   progress,
   running = false,
   geometry: g,
   className,
 }: Props & { geometry: Geometry; className: string }) {
+  const contextLocale = useLocale();
+  const locale = explicitLocale ?? contextLocale;
+  const c = getTransferCopy(locale);
   const marker = `transfer-${useId().replaceAll(":", "")}`;
   const { plan, costs } = estimate;
   const total = Math.max(plan.records, 1);
@@ -88,7 +96,7 @@ function Diagram({
     (progress.phase === "reading" || (lazy && progress.phase === "writing"));
   const writeFlow = running && progress.phase === "writing";
   const records = (n: number) =>
-    `${formatNumber("ru", n)} ${plural(n, c.words.record)}`;
+    `${formatNumber(locale, n)} ${plural(n, c.words.record, locale)}`;
   const { source, process, target } = g;
   const inside = g.titlesInside;
   // Content area of the source and target boxes, below an inside title.
@@ -143,7 +151,7 @@ function Diagram({
         textAnchor={arrow.anchor}
         className="transfer-count"
       >
-        {formatNumber("ru", count)}
+        {formatNumber(locale, count)}
       </text>
       <text
         x={arrow.labelX}
@@ -209,10 +217,10 @@ function Diagram({
         c.source,
         c.process,
         c.target,
-        formatNumber("ru", progress.recordsWritten),
+        formatNumber(locale, progress.recordsWritten),
         records(plan.records),
-        formatBytes("ru", progress.memoryBytes),
-        formatBytes("ru", costs.memoryLimitBytes),
+        formatBytes(locale, progress.memoryBytes),
+        formatBytes(locale, costs.memoryLimitBytes),
       )}
     >
       <defs>
@@ -243,7 +251,7 @@ function Diagram({
       {arrowLabel(
         g.read,
         readCount,
-        lazy ? plural(readCount, c.words.page) : c.readAll,
+        lazy ? plural(readCount, c.words.page, locale) : c.readAll,
       )}
 
       <rect
@@ -302,7 +310,7 @@ function Diagram({
             y={gaugeY + 32}
             className="transfer-small strong"
           >
-            {formatBytes("ru", progress.memoryBytes)}
+            {formatBytes(locale, progress.memoryBytes)}
           </text>
           <text
             x={process.x + process.width - 14}
@@ -310,7 +318,7 @@ function Diagram({
             textAnchor="end"
             className="transfer-small"
           >
-            {fill(c.limit, formatBytes("ru", costs.memoryLimitBytes))}
+            {fill(c.limit, formatBytes(locale, costs.memoryLimitBytes))}
           </text>
         </>
       )}
@@ -326,14 +334,18 @@ function Diagram({
       {arrowLabel(
         g.write,
         writeCount,
-        plural(writeCount, plan.batchSize > 1 ? c.words.batch : c.words.insert),
+        plural(
+          writeCount,
+          plan.batchSize > 1 ? c.words.batch : c.words.insert,
+          locale,
+        ),
       )}
 
       <rect {...target} rx="8" className="transfer-db" />
       {title(
         target,
         c.target,
-        fill(c.writtenOf, formatNumber("ru", progress.recordsWritten)),
+        fill(c.writtenOf, formatNumber(locale, progress.recordsWritten)),
       )}
       <rect
         x={target.x + pad}

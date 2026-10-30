@@ -1,36 +1,36 @@
 ---
 import { localeFromPath, localizedPath } from "../i18n";
+import { getNavigationCopy } from "../content/localized";
 interface Props {
   model: "pull" | "push";
 }
 const { model } = Astro.props;
 const locale = localeFromPath(Astro.url.pathname);
+const n = getNavigationCopy(locale);
 ---
 
 <header class="story-heading transfer-heading">
-  <nav class="story-breadcrumb" aria-label="Хлебные крошки">
-    <a href={`${localizedPath(locale)}#atlas`}>Атлас</a>
+  <nav class="story-breadcrumb" aria-label={n.breadcrumb}>
+    <a href={`${localizedPath(locale)}#atlas`}>{n.atlas}</a>
     <span aria-hidden="true">/</span>
-    <span>Перенос данных</span>
+    <span>{n.category}</span>
   </nav>
-  <h1>Из одной системы в другую.</h1>
-  <p class="story-intro">
-    Два способа переноса. Решения, их пределы и последствия.
-  </p>
+  <h1>{n.title}</h1>
+  <p class="story-intro">{n.intro}</p>
 </header>
-<nav class="transfer-models" aria-label="Модели переноса данных">
+<nav class="transfer-models" aria-label={n.models}>
   <a
     href={localizedPath(locale, "/data-transfers/")}
     aria-current={model === "pull" ? "page" : undefined}
   >
-    <span>Читаем источник</span>
-    <small>Pull · запросы по инициативе приёмника</small>
+    <span>{n.pull}</span>
+    <small>{n.pullSub}</small>
   </a>
   <a
     href={localizedPath(locale, "/data-transfers/push/")}
     aria-current={model === "push" ? "page" : undefined}
   >
-    <span>Источник отправляет</span>
-    <small>Push · доставка событий</small>
+    <span>{n.push}</span>
+    <small>{n.pushSub}</small>
   </a>
 </nav>

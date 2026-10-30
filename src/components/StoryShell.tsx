@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { getNavigationCopy } from "../content/localized";
+import { useLocale } from "../i18n/react";
 import { useHydrated } from "./useHydrated";
 
 type Scene = {
@@ -22,6 +24,7 @@ export default function StoryShell({
   controlsLabel: string;
   lab: (scene: number, hydrated: boolean) => ReactNode;
 }) {
+  const n = getNavigationCopy(useLocale());
   const hydrated = useHydrated();
   const [selection, setSelection] = useState({
     scene: 0,
@@ -41,6 +44,7 @@ export default function StoryShell({
     active.current = next;
     if (window.location.hash !== `#${item.id}`) {
       window.history.pushState(null, "", `#${item.id}`);
+      window.dispatchEvent(new Event("atlas:scenechange"));
     }
     setSelection({ scene: next, move: true, focus });
   };
@@ -57,7 +61,10 @@ export default function StoryShell({
       const index = hash ? next : 0;
       const item = scenes[index];
       if (!item) return;
-      if (legacy) window.history.replaceState(null, "", `#${item.id}`);
+      if (legacy) {
+        window.history.replaceState(null, "", `#${item.id}`);
+        window.dispatchEvent(new Event("atlas:scenechange"));
+      }
       navigating.current = true;
       active.current = index;
       setSelection({ scene: index, move: Boolean(hash), focus: false });
@@ -102,7 +109,7 @@ export default function StoryShell({
           !window.matchMedia("(min-width: 900px)").matches
         )
           return;
-        const anchor = Math.max(120, window.innerHeight * 0.3);
+        const anchor = Math.max(220, window.innerHeight * 0.3);
         const visible = Array.from(
           shell.current?.querySelectorAll<HTMLElement>("[data-scene]") ?? [],
         ).find((element) => {
@@ -117,6 +124,7 @@ export default function StoryShell({
         setSelection({ scene: next, move: false, focus: false });
         // Scrolling updates the current address without filling browser history.
         window.history.replaceState(null, "", `#${item.id}`);
+        window.dispatchEvent(new Event("atlas:scenechange"));
       });
     };
     window.addEventListener("scroll", followScroll, { passive: true });
@@ -134,7 +142,7 @@ export default function StoryShell({
       className={`story-explorer ${hydrated ? "is-interactive" : ""}`}
     >
       <aside className="scene-outline">
-        <p className="scene-outline-label">По ходу исследования</p>
+        <p className="scene-outline-label">{n.outline}</p>
         <nav className="scene-toc" aria-label={scenesLabel}>
           {scenes.map((item, i) => (
             <a
@@ -163,7 +171,7 @@ export default function StoryShell({
         </nav>
       </aside>
       <div className="scene-picker">
-        <label htmlFor="scene-select">Ситуация</label>
+        <label htmlFor="scene-select">{n.situation}</label>
         <select
           id="scene-select"
           value={scene}
@@ -210,7 +218,7 @@ export default function StoryShell({
             </a>
             <nav
               className="scene-pager"
-              aria-label={`Переходы: ${item.navTitle}`}
+              aria-label={`${n.transitions}: ${item.navTitle}`}
             >
               {i > 0 ? (
                 <a
@@ -228,7 +236,7 @@ export default function StoryShell({
                     navigate(i - 1, true);
                   }}
                 >
-                  ← Назад
+                  {n.previous}
                 </a>
               ) : (
                 <span />
@@ -249,7 +257,7 @@ export default function StoryShell({
                     navigate(i + 1, true);
                   }}
                 >
-                  Далее →
+                  {n.next}
                 </a>
               ) : (
                 <span />
@@ -270,7 +278,7 @@ export default function StoryShell({
                 event.preventDefault();
                 navigate(i);
               }}
-              aria-label={`Прямая ссылка: ${item.navTitle}`}
+              aria-label={`${n.permalink}: ${item.navTitle}`}
             >
               ↗ #{item.id}
             </a>

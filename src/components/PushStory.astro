@@ -2,7 +2,11 @@
 import Layout from "../layouts/Layout.astro";
 import TransferNavigation from "./TransferNavigation.astro";
 import PushExplorer from "./PushExplorer";
-import { pushCopy as c } from "../content/push";
+import { getPushCopy, getNavigationCopy } from "../content/localized";
+import { localeFromPath } from "../i18n";
+const locale = localeFromPath(Astro.url.pathname);
+const c = getPushCopy(locale);
+const n = getNavigationCopy(locale);
 ---
 
 <Layout title={c.category} description={c.intro} editorial>
@@ -12,7 +16,7 @@ import { pushCopy as c } from "../content/push";
     <noscript>
       <p class="story-noscript">{c.noJs}</p>
     </noscript>
-    <PushExplorer client:load />
+    <PushExplorer locale={locale} client:load />
     <section class="story-versus" aria-labelledby="versus-title">
       <h2 id="versus-title">{c.compareTitle}</h2>
       <p>{c.compareIntro}</p>
@@ -46,16 +50,16 @@ import { pushCopy as c } from "../content/push";
         <h2>{c.sources}</h2>
         <p>{c.sourcesIntro}</p>
         <a href="https://kafka.apache.org/documentation/#design_consumerposition">
-          Apache Kafka — позиция потребителя и offset ↗
+          {n.offsetSource} ↗
         </a>
         <a href="https://kafka.apache.org/documentation/#semantics">
-          Apache Kafka — гарантии доставки ↗
+          {n.deliverySource} ↗
         </a>
         <a href="https://www.rabbitmq.com/docs/dlx">
           RabbitMQ — dead letter exchanges ↗
         </a>
         <a href="https://github.com/AlekseiDudchenko/data-transfer-service/blob/docs/large-data-transfer-notes/scaling-large-data-transfers-minimal.html">
-          Заметки, на которых основано исследование ↗
+          {n.notes} ↗
         </a>
       </div>
     </section>

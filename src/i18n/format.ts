@@ -58,11 +58,13 @@ export function formatBytes(locale: Locale, bytes: number): string {
 
 const russianPlurals = new Intl.PluralRules("ru");
 
-/** Picks the Russian form for a count: 1 запись, 3 записи, 5 записей. */
+/** Russian has three cardinal forms; English uses singular only for 1. */
 export function plural(
   count: number,
   forms: readonly [one: string, few: string, many: string],
+  locale: Locale = "ru",
 ): string {
+  if (locale !== "ru") return count === 1 ? forms[0] : forms[2];
   const category = russianPlurals.select(count);
   return category === "one"
     ? forms[0]
