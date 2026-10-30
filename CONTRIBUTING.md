@@ -4,7 +4,7 @@ Start with an issue describing the reader's problem and the observable outcome. 
 
 For model changes, state invariants and add tests that would fail if a guarantee were broken. Keep simulation logic free of UI, clocks, randomness, and I/O. Avoid a shared framework until repeated requirements justify it. Add an ADR for a consequential change in boundaries or guarantees.
 
-For explorations, follow [content guidelines](docs/content-guidelines.md). Write original prose (Russian for now), cite primary sources, and explicitly explain model limitations. Do not reproduce published figures, exercises, or chapter structure. Contributions are under the project's MIT license; ensure you may license submitted material.
+For explorations, follow [content guidelines](docs/content-guidelines.md). Write original prose in English and Russian, cite primary sources, and explicitly explain model limitations. Do not reproduce published figures, exercises, or chapter structure. Contributions are under the project's MIT license; ensure you may license submitted material.
 
 Run type checking, linting, model tests, production build, and browser tests before requesting review. Check mobile layout, keyboard flow, screen-reader names, text equivalents, color-independent feedback, and JavaScript-disabled prose. Browser automation is a baseline, not full assistive-technology certification.
 

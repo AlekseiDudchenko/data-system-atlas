@@ -7,7 +7,7 @@ type Scene = {
   body: string;
   insight: string;
 };
-type Copy = {
+export type Copy = {
   category: string;
   title: string;
   intro: string;

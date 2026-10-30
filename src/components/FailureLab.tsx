@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { fill, transferCopy as c } from "../content/transfers";
+import { fill } from "../content/transfers";
+import { getTransferCopy } from "../content/localized";
+import { useLocale } from "../i18n/react";
+import type { Locale } from "../i18n";
 import { formatDuration, formatNumber } from "../i18n/format";
 import {
   batchState,
@@ -18,7 +21,6 @@ import { useRun } from "./useRun";
 
 export type FailureScene = 4 | 5 | 6;
 
-const f = c.failure;
 const all = { drop: true, lostAck: true, crash: true };
 const defaults: Record<FailureScene, ReliabilityPlan> = {
   4: {
@@ -53,13 +55,14 @@ function alternative(
   };
 }
 
-const checkpointNames: Record<CheckpointMode, string> = {
-  none: f.noCheckpoint,
-  "after-write": `Checkpoint ${f.checkpointAfter}`,
-  "before-write": `Checkpoint ${f.checkpointBefore}`,
-};
+function describe(scene: FailureScene, plan: ReliabilityPlan, locale: Locale) {
+  const f = getTransferCopy(locale).failure;
+  const checkpointNames: Record<CheckpointMode, string> = {
+    none: f.noCheckpoint,
+    "after-write": `Checkpoint ${f.checkpointAfter}`,
+    "before-write": `Checkpoint ${f.checkpointBefore}`,
+  };
 
-function describe(scene: FailureScene, plan: ReliabilityPlan) {
   if (scene === 4) return plan.retry ? f.withRetry : f.noRetry;
   if (scene === 5) return plan.writeMode === "upsert" ? "UPSERT" : "INSERT";
   return checkpointNames[plan.checkpoint];
@@ -72,6 +75,9 @@ export default function FailureLab({
   scene: FailureScene;
   hydrated: boolean;
 }) {
+  const locale = useLocale();
+  const c = getTransferCopy(locale);
+  const f = c.failure;
   const [plan, setPlan] = useState<ReliabilityPlan>(defaults[scene]);
   const { share, ran, running, run, reset } = useRun(4_000);
   const result = simulateReliability(plan);
@@ -90,21 +96,23 @@ export default function FailureLab({
     [f.missing, state.missingRecords],
   ]
     .filter(([, n]) => Number(n) > 0)
-    .map(([label, n]) => fill(f.detail, label!, formatNumber("ru", Number(n))))
+    .map(([label, n]) =>
+      fill(f.detail, label!, formatNumber(locale, Number(n))),
+    )
     .join(" ");
   const status =
     state.status === "done"
       ? `${fill(
           f.done,
-          formatDuration("ru", result.durationMs),
-          formatNumber("ru", state.uniqueRecords),
+          formatDuration(locale, result.durationMs),
+          formatNumber(locale, state.uniqueRecords),
         )} ${details}`.trim()
       : state.status === "aborted"
         ? `${fill(
             f.aborted,
             lastBatch + 1,
-            formatDuration("ru", result.durationMs),
-            formatNumber("ru", state.uniqueRecords),
+            formatDuration(locale, result.durationMs),
+            formatNumber(locale, state.uniqueRecords),
           )} ${details}`.trim()
         : state.status === "restarting"
           ? f.restarting
@@ -122,24 +130,24 @@ export default function FailureLab({
 
   return (
     <>
-      <p className="lab-mode">{describe(scene, plan)}</p>
+      <p className="lab-mode">{describe(scene, plan, locale)}</p>
       <FailureDiagram state={state} plan={plan} />
       <div className="story-counters">
         <span>
           {c.elapsed}
-          <strong>{formatDuration("ru", state.elapsedMs)}</strong>
+          <strong>{formatDuration(locale, state.elapsedMs)}</strong>
         </span>
         <span>
           {f.unique}
-          <strong>{formatNumber("ru", state.uniqueRecords)}</strong>
+          <strong>{formatNumber(locale, state.uniqueRecords)}</strong>
         </span>
         <span>
           {repeatLabel}
-          <strong>{formatNumber("ru", state.repeatedRecords)}</strong>
+          <strong>{formatNumber(locale, state.repeatedRecords)}</strong>
         </span>
         <span>
           {f.missing}
-          <strong>{formatNumber("ru", state.missingRecords)}</strong>
+          <strong>{formatNumber(locale, state.missingRecords)}</strong>
         </span>
       </div>
       <fieldset
@@ -221,7 +229,7 @@ export default function FailureLab({
         <CompareTable
           columns={compared.map((item, i) => ({
             title: i === 0 ? f.alternative : c.after,
-            subtitle: describe(scene, item.plan),
+            subtitle: describe(scene, item.plan, locale),
           }))}
           rows={[
             {
@@ -233,20 +241,20 @@ export default function FailureLab({
             {
               label: c.duration,
               values: compared.map((item) =>
-                formatDuration("ru", item.run.durationMs),
+                formatDuration(locale, item.run.durationMs),
               ),
             },
             {
               label: f.unique,
               values: compared.map((item) =>
-                formatNumber("ru", item.state.uniqueRecords),
+                formatNumber(locale, item.state.uniqueRecords),
               ),
             },
             {
               label: f.duplicates,
               values: compared.map((item) =>
                 formatNumber(
-                  "ru",
+                  locale,
                   item.plan.writeMode === "insert"
                     ? item.state.repeatedRecords
                     : 0,
@@ -257,7 +265,7 @@ export default function FailureLab({
               label: f.rewritten,
               values: compared.map((item) =>
                 formatNumber(
-                  "ru",
+                  locale,
                   item.plan.writeMode === "upsert"
                     ? item.state.repeatedRecords
                     : 0,
@@ -267,7 +275,7 @@ export default function FailureLab({
             {
               label: f.missing,
               values: compared.map((item) =>
-                formatNumber("ru", item.state.missingRecords),
+                formatNumber(locale, item.state.missingRecords),
               ),
             },
             {
@@ -297,15 +305,6 @@ export default function FailureLab({
   );
 }
 
-const scriptState: Record<ReliabilityState["status"], string> = {
-  idle: f.stateIdle,
-  running: f.stateRunning,
-  waiting: f.stateWaiting,
-  restarting: f.stateRestarting,
-  done: f.stateDone,
-  aborted: f.stateAborted,
-};
-
 /** Merges neighbouring batches with the same state into one bar segment. */
 function segments(state: ReliabilityState) {
   const result: { from: number; to: number; kind: BatchState }[] = [];
@@ -325,6 +324,17 @@ function FailureDiagram({
   state: ReliabilityState;
   plan: ReliabilityPlan;
 }) {
+  const locale = useLocale();
+  const f = getTransferCopy(locale).failure;
+  const scriptState: Record<ReliabilityState["status"], string> = {
+    idle: f.stateIdle,
+    running: f.stateRunning,
+    waiting: f.stateWaiting,
+    restarting: f.stateRestarting,
+    done: f.stateDone,
+    aborted: f.stateAborted,
+  };
+
   const repeatName =
     plan.writeMode === "insert" ? f.legendDuplicate : f.legendRewritten;
   const marks = (["drop", "lostAck", "crash"] as const).filter(
@@ -337,7 +347,7 @@ function FailureDiagram({
         <span>
           {state.checkpoint === null
             ? f.checkpointEmpty
-            : fill(f.checkpointAt, formatNumber("ru", state.checkpoint))}
+            : fill(f.checkpointAt, formatNumber(locale, state.checkpoint))}
         </span>
         <span>
           {f.retries}: {state.retries} · {f.restarts}: {state.restarts}
@@ -351,9 +361,9 @@ function FailureDiagram({
         role="img"
         aria-label={fill(
           f.diagramLabel,
-          formatNumber("ru", state.uniqueRecords),
-          formatNumber("ru", state.repeatedRecords),
-          formatNumber("ru", state.missingRecords),
+          formatNumber(locale, state.uniqueRecords),
+          formatNumber(locale, state.repeatedRecords),
+          formatNumber(locale, state.missingRecords),
           fill(f.script, scriptState[state.status]),
         )}
       >
@@ -416,7 +426,8 @@ function FailureDiagram({
   );
 }
 
-function eventText(step: Step) {
+function eventText(step: Step, locale: Locale) {
+  const f = getTransferCopy(locale).failure;
   const batch = step.batch + 1;
   switch (step.kind) {
     case "drop":
@@ -424,7 +435,7 @@ function eventText(step: Step) {
     case "lost-ack":
       return fill(f.eventLostAck, batch);
     case "retry":
-      return fill(f.eventRetry, formatDuration("ru", step.value ?? 0));
+      return fill(f.eventRetry, formatDuration(locale, step.value ?? 0));
     case "crash":
       return fill(f.eventCrash, batch);
     case "restart":
@@ -437,6 +448,8 @@ function eventText(step: Step) {
 }
 
 function EventLog({ events }: { events: readonly Step[] }) {
+  const locale = useLocale();
+  const f = getTransferCopy(locale).failure;
   return (
     <div className="failure-log">
       <h3>{f.log}</h3>
@@ -446,7 +459,8 @@ function EventLog({ events }: { events: readonly Step[] }) {
         <ol>
           {events.slice(-6).map((step, i) => (
             <li key={`${step.t}-${i}`}>
-              <span>{formatDuration("ru", step.t)}</span> {eventText(step)}
+              <span>{formatDuration(locale, step.t)}</span>{" "}
+              {eventText(step, locale)}
             </li>
           ))}
         </ol>

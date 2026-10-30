@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { fill, transferCopy as c } from "../content/transfers";
+import { fill } from "../content/transfers";
+import { getTransferCopy } from "../content/localized";
+import { useLocale } from "../i18n/react";
 import { formatDuration, formatNumber, plural } from "../i18n/format";
 import {
   parallelAt,
@@ -12,16 +14,19 @@ import {
 import CompareTable from "./CompareTable";
 import { useRun } from "./useRun";
 
-const p = c.parallel;
 const defaults: ParallelPlan = { workers: 4, skewed: false };
-const batches = (n: number) =>
-  `${formatNumber("ru", n)} ${plural(n, c.words.batch)}`;
-
-function describe(plan: ParallelPlan) {
-  return `${fill(p.workersLabel, plan.workers)} · ${plan.skewed ? p.skewedShort : p.even}`;
-}
 
 export default function ParallelLab({ hydrated }: { hydrated: boolean }) {
+  const locale = useLocale();
+  const c = getTransferCopy(locale);
+  const p = c.parallel;
+  const batches = (n: number) =>
+    `${formatNumber(locale, n)} ${plural(n, c.words.batch, locale)}`;
+
+  function describe(plan: ParallelPlan) {
+    return `${fill(p.workersLabel, plan.workers)} · ${plan.skewed ? p.skewedShort : p.even}`;
+  }
+
   const [plan, setPlan] = useState<ParallelPlan>(defaults);
   const { share, ran, running, run, reset } = useRun(3_000);
   const result = simulateParallel(plan);
@@ -35,11 +40,11 @@ export default function ParallelLab({ hydrated }: { hydrated: boolean }) {
     setPlan((current) => ({ ...current, ...update }));
   };
   const speedup = (r: ParallelRun) =>
-    formatNumber("ru", single.durationMs / r.durationMs, 1);
+    formatNumber(locale, single.durationMs / r.durationMs, 1);
   const finished = state.done.reduce((a, b) => a + b, 0);
   const largest = Math.max(...result.workers.map((w) => w.batches));
   const status = state.finished
-    ? fill(p.done, formatDuration("ru", result.durationMs), speedup(result))
+    ? fill(p.done, formatDuration(locale, result.durationMs), speedup(result))
     : share !== null
       ? p.running
       : p.idle;
@@ -71,7 +76,7 @@ export default function ParallelLab({ hydrated }: { hydrated: boolean }) {
                 <span className="lane-count">
                   {state.waiting[i]
                     ? p.waiting
-                    : `${formatNumber("ru", done)} / ${formatNumber("ru", worker.batches)}`}
+                    : `${formatNumber(locale, done)} / ${formatNumber(locale, worker.batches)}`}
                 </span>
               </li>
             );
@@ -81,17 +86,17 @@ export default function ParallelLab({ hydrated }: { hydrated: boolean }) {
       <div className="story-counters">
         <span>
           {c.elapsed}
-          <strong>{formatDuration("ru", state.elapsedMs)}</strong>
+          <strong>{formatDuration(locale, state.elapsedMs)}</strong>
         </span>
         <span>
           {c.written}
           <strong>
-            {formatNumber("ru", finished * parallelCosts.batchSize)}
+            {formatNumber(locale, finished * parallelCosts.batchSize)}
             <span>
               {" "}
               /{" "}
               {formatNumber(
-                "ru",
+                locale,
                 parallelCosts.batches * parallelCosts.batchSize,
               )}
             </span>
@@ -144,7 +149,7 @@ export default function ParallelLab({ hydrated }: { hydrated: boolean }) {
             (rows, r) => {
               const sizes = r.workers.map((w) => w.batches);
               const values = [
-                formatDuration("ru", r.durationMs),
+                formatDuration(locale, r.durationMs),
                 `×${speedup(r)}`,
                 String(r.peakConnections),
                 batches(Math.max(...sizes)),
