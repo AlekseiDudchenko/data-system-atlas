@@ -11,11 +11,13 @@ export default function StoryShell({
   scenesLabel,
   controlsLabel,
   lab,
+  sceneExtra,
 }: {
   scenes: readonly Scene[];
   scenesLabel: string;
   controlsLabel: string;
   lab: (scene: number, hydrated: boolean) => ReactNode;
+  sceneExtra?: (scene: number) => ReactNode;
 }) {
   const hydrated = useHydrated();
   const [scene, setScene] = useState(0);
@@ -65,6 +67,7 @@ export default function StoryShell({
             <h2 id={`scene-title-${i}`}>{item.title}</h2>
             <p>{item.body}</p>
             <p className="scene-insight">{item.insight}</p>
+            {sceneExtra?.(i)}
             <a
               href="#story-workspace"
               className="scene-open"

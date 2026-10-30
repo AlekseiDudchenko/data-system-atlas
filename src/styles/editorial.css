@@ -1086,3 +1086,35 @@
     display: none;
   }
 }
+
+/* Native details keeps Java examples readable before hydration and without JS. */
+.java-example {
+  margin: 26px 0;
+  min-width: 0;
+  border-block: 1px solid var(--border);
+  padding: 16px 0;
+}
+.java-example summary {
+  cursor: pointer;
+  color: var(--story-accent);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.java-example pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--text);
+  tab-size: 4;
+}
+.java-example code { font-family: ui-monospace, monospace; }
+.java-example summary:focus-visible,
+.java-example pre:focus-visible {
+  outline: 2px solid var(--story-accent);
+  outline-offset: 4px;
+}
