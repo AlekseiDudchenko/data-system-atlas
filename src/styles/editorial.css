@@ -275,28 +275,6 @@
   min-width: 0;
   scroll-margin-top: 20px;
 }
-.scene-nav {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 14px;
-  flex-wrap: wrap;
-}
-.editorial .scene-nav button {
-  border: 0;
-  border-radius: 3px;
-  color: var(--muted);
-  background: transparent;
-  padding: 7px 12px;
-  font-family: ui-monospace, SFMono-Regular, monospace;
-  font-size: 11px;
-  font-weight: 400;
-}
-.editorial .scene-nav button[aria-pressed="true"] {
-  color: var(--text);
-  background: var(--story-row);
-}
 .lab-mode {
   margin: 12px 0 0;
   text-align: right;
@@ -1084,5 +1062,230 @@
 @media (prefers-reduced-motion: reduce) {
   .transfer-packet {
     display: none;
+  }
+}
+
+/* Transfer navigation: model → named situation → active experiment. */
+.story-explorer {
+  scroll-margin-top: 122px;
+}
+.transfer-heading {
+  max-width: none;
+  padding: 36px 0 24px;
+}
+.transfer-heading h1 {
+  font-size: clamp(32px, 4vw, 48px);
+  margin: 26px 0 12px;
+}
+.transfer-heading .story-intro {
+  max-width: none;
+  margin-bottom: 0;
+  font-size: 16px;
+}
+.story-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--muted);
+}
+.story-breadcrumb a {
+  color: inherit;
+  text-decoration: none;
+}
+.transfer-models {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  background: var(--page);
+  border-bottom: 1px solid var(--border);
+}
+.transfer-models a {
+  min-width: 0;
+  text-decoration: none;
+  padding: 18px 0;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+}
+.transfer-models a[aria-current="page"] {
+  border-color: var(--story-accent);
+  color: var(--text);
+}
+.transfer-models span {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+}
+.transfer-models small {
+  display: block;
+  font-size: 11px;
+  margin-top: 4px;
+}
+.model-intro {
+  max-width: 850px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--muted);
+  margin: 24px 0 32px;
+}
+.story-explorer {
+  grid-template-columns: 180px minmax(0, 0.82fr) minmax(0, 1.3fr);
+  gap: 32px;
+  border-top: 0;
+}
+.scene-outline {
+  position: sticky;
+  top: 122px;
+  padding: 8px 0;
+  min-width: 0;
+}
+.scene-outline-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+.scene-toc {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.scene-toc a {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  text-decoration: none;
+  color: var(--muted);
+  padding: 10px 8px;
+  border-left: 2px solid transparent;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.scene-toc a[aria-current="step"] {
+  background: var(--story-row);
+  border-color: var(--story-accent);
+  color: var(--text);
+}
+.scene-number {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.scene-picker {
+  display: none;
+}
+.story-scene {
+  padding: 8px 0 90px;
+  scroll-margin-top: 122px;
+}
+.story-workspace {
+  margin-top: 0;
+  top: 108px;
+  max-height: calc(100vh - 124px);
+}
+.scene-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  margin-top: 32px;
+}
+.scene-pager a {
+  color: var(--story-accent);
+  text-decoration: none;
+  padding: 8px 0;
+  font-size: 12px;
+}
+.scene-permalink {
+  display: inline-block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 14px;
+  text-underline-offset: 4px;
+}
+@media (min-width: 900px) and (max-width: 1099px) {
+  .story-explorer {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+  .scene-outline {
+    grid-column: 1 / -1;
+    position: static;
+  }
+  .scene-toc {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+  .scene-toc a {
+    padding: 8px;
+  }
+  .scene-outline-label {
+    margin-bottom: 8px;
+  }
+}
+@media (max-width: 899px) {
+  .transfer-models {
+    gap: 18px;
+  }
+  .transfer-models span {
+    font-size: 14px;
+  }
+  .transfer-models a {
+    padding: 14px 0;
+  }
+  .transfer-models small {
+    line-height: 1.6;
+  }
+  .model-intro {
+    font-size: 13px;
+    margin: 20px 0 24px;
+  }
+  .story-explorer {
+    gap: 0;
+  }
+  .scene-outline {
+    position: static;
+    width: 100%;
+  }
+  .is-interactive .scene-outline {
+    display: none;
+  }
+  .is-interactive .scene-picker {
+    display: grid;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 26px;
+  }
+  .scene-picker label {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .editorial .scene-picker select {
+    width: 100%;
+    min-width: 0;
+    font-size: 16px;
+    padding: 12px;
+  }
+  .story-scene {
+    padding: 0 0 16px;
+    max-width: none;
+    scroll-margin-top: 120px;
+  }
+  .story-workspace {
+    position: static;
+    max-height: none;
+    margin: 12px 0 0;
+    padding: 0 0 20px;
+  }
+  .scene-pager {
+    margin-top: 24px;
+  }
+  .scene-pager a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
   }
 }

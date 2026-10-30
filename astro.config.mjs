@@ -19,4 +19,6 @@ export default defineConfig({
     "/de/data-transfers/push": "/ru/data-transfers/push/",
   },
   integrations: [react(), mdx()],
+  // Development preview host used by the workspace browser.
+  vite: { server: { allowedHosts: ["terminal.local"] } },
 });

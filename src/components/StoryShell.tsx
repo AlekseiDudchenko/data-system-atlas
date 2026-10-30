@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useHydrated } from "./useHydrated";
 
-type Scene = { title: string; body: string; insight: string };
-
+type Scene = {
+  id: string;
+  navTitle: string;
+  title: string;
+  body: string;
+  insight: string;
+};
 const number = (i: number) => String(i + 1).padStart(2, "0");
 
-/** Scroll-driven scenes beside one workspace; each scene renders its lab. */
+/** One scene selection drives the outline, URL, narrative and active lab. */
 export default function StoryShell({
   scenes,
   scenesLabel,
@@ -18,43 +23,165 @@ export default function StoryShell({
   lab: (scene: number, hydrated: boolean) => ReactNode;
 }) {
   const hydrated = useHydrated();
-  const [scene, setScene] = useState(0);
+  const [selection, setSelection] = useState({
+    scene: 0,
+    move: false,
+    focus: false,
+  });
+  const { scene } = selection;
   const active = useRef(0);
+  const navigating = useRef(false);
+  const shell = useRef<HTMLDivElement>(null);
   const count = String(scenes.length).padStart(2, "0");
-  const switchScene = (next: number) => {
-    if (active.current === next) return;
+
+  const navigate = (next: number, focus = false) => {
+    const item = scenes[next];
+    if (!item) return;
+    navigating.current = true;
     active.current = next;
-    setScene(next);
+    if (window.location.hash !== `#${item.id}`) {
+      window.history.pushState(null, "", `#${item.id}`);
+    }
+    setSelection({ scene: next, move: true, focus });
   };
 
   useEffect(() => {
-    if (!window.matchMedia("(min-width: 900px)").matches) return;
-    const elements = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-scene]"),
-    );
-    const observer = new IntersectionObserver(
-      () => {
-        // Read current positions, since queued entries can precede a manual jump.
-        const anchor = window.innerHeight * 0.3;
-        const visible = elements.find((element) => {
+    const fromLocation = () => {
+      const hash = window.location.hash.slice(1);
+      const legacy = /^scene-(\d+)$/.exec(hash);
+      const next = legacy
+        ? Number(legacy[1]) - 1
+        : scenes.findIndex((item) => item.id === hash);
+      // Empty fragments (including Back to the initial URL) select the first scene.
+      if (hash && !scenes[next]) return;
+      const index = hash ? next : 0;
+      const item = scenes[index];
+      if (!item) return;
+      if (legacy) window.history.replaceState(null, "", `#${item.id}`);
+      navigating.current = true;
+      active.current = index;
+      setSelection({ scene: index, move: Boolean(hash), focus: false });
+    };
+    fromLocation();
+    window.addEventListener("hashchange", fromLocation);
+    window.addEventListener("popstate", fromLocation);
+    return () => {
+      window.removeEventListener("hashchange", fromLocation);
+      window.removeEventListener("popstate", fromLocation);
+    };
+  }, [scenes]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (selection.move) {
+      const section = shell.current?.querySelector<HTMLElement>(
+        `[data-scene="${scene}"]`,
+      );
+      const target = window.matchMedia("(min-width: 900px)").matches
+        ? section
+        : shell.current;
+      target?.scrollIntoView({ block: "start", behavior: "instant" });
+      if (selection.focus)
+        section
+          ?.querySelector<HTMLElement>("h2")
+          ?.focus({ preventScroll: true });
+    }
+    const frame = requestAnimationFrame(() => {
+      navigating.current = false;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [selection, scene, hydrated]);
+
+  useEffect(() => {
+    let frame = 0;
+    const followScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        if (
+          navigating.current ||
+          !window.matchMedia("(min-width: 900px)").matches
+        )
+          return;
+        const anchor = Math.max(120, window.innerHeight * 0.3);
+        const visible = Array.from(
+          shell.current?.querySelectorAll<HTMLElement>("[data-scene]") ?? [],
+        ).find((element) => {
           const bounds = element.getBoundingClientRect();
           return bounds.top <= anchor && bounds.bottom > anchor;
         });
-        if (visible) switchScene(Number(visible.dataset.scene));
-      },
-      { rootMargin: "-15% 0px -55% 0px", threshold: 0 },
-    );
-    elements.forEach((element) => observer.observe(element));
-    return () => observer.disconnect();
-  }, []);
+        if (!visible) return;
+        const next = Number(visible.dataset.scene);
+        const item = scenes[next];
+        if (!item || next === active.current) return;
+        active.current = next;
+        setSelection({ scene: next, move: false, focus: false });
+        // Scrolling updates the current address without filling browser history.
+        window.history.replaceState(null, "", `#${item.id}`);
+      });
+    };
+    window.addEventListener("scroll", followScroll, { passive: true });
+    window.addEventListener("resize", followScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", followScroll);
+      window.removeEventListener("resize", followScroll);
+    };
+  }, [scenes]);
 
   return (
-    <div className={`story-explorer ${hydrated ? "is-interactive" : ""}`}>
+    <div
+      ref={shell}
+      className={`story-explorer ${hydrated ? "is-interactive" : ""}`}
+    >
+      <aside className="scene-outline">
+        <p className="scene-outline-label">По ходу исследования</p>
+        <nav className="scene-toc" aria-label={scenesLabel}>
+          {scenes.map((item, i) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              aria-current={scene === i ? "step" : undefined}
+              onClick={(event) => {
+                if (
+                  !hydrated ||
+                  event.metaKey ||
+                  event.ctrlKey ||
+                  event.shiftKey ||
+                  event.altKey
+                )
+                  return;
+                event.preventDefault();
+                navigate(i);
+              }}
+            >
+              <span className="scene-number" aria-hidden="true">
+                {number(i)}
+              </span>
+              <span>{item.navTitle}</span>
+            </a>
+          ))}
+        </nav>
+      </aside>
+      <div className="scene-picker">
+        <label htmlFor="scene-select">Ситуация</label>
+        <select
+          id="scene-select"
+          value={scene}
+          disabled={!hydrated}
+          onChange={(event) => navigate(Number(event.target.value))}
+        >
+          {scenes.map((item, i) => (
+            <option key={item.id} value={i}>
+              {number(i)} / {count} · {item.navTitle}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="story-narrative">
         {scenes.map((item, i) => (
           <section
-            key={i}
-            id={`scene-${i + 1}`}
+            key={item.id}
+            id={item.id}
             data-scene={i}
             className={`story-scene ${scene === i ? "active" : ""}`}
             aria-labelledby={`scene-title-${i}`}
@@ -62,15 +189,18 @@ export default function StoryShell({
             <span className="story-index">
               {number(i)} / {count}
             </span>
-            <h2 id={`scene-title-${i}`}>{item.title}</h2>
+            <h2 id={`scene-title-${i}`} tabIndex={-1}>
+              {item.title}
+            </h2>
             <p>{item.body}</p>
             <p className="scene-insight">{item.insight}</p>
             <a
               href="#story-workspace"
               className="scene-open"
               onClick={(event) => {
+                if (!hydrated) return;
                 event.preventDefault();
-                switchScene(i);
+                navigate(i);
                 document
                   .getElementById("story-workspace")
                   ?.focus({ preventScroll: true });
@@ -78,31 +208,76 @@ export default function StoryShell({
             >
               {controlsLabel} <span aria-hidden="true">↗</span>
             </a>
+            <nav
+              className="scene-pager"
+              aria-label={`Переходы: ${item.navTitle}`}
+            >
+              {i > 0 ? (
+                <a
+                  href={`#${scenes[i - 1]?.id}`}
+                  onClick={(event) => {
+                    if (
+                      !hydrated ||
+                      event.metaKey ||
+                      event.ctrlKey ||
+                      event.shiftKey ||
+                      event.altKey
+                    )
+                      return;
+                    event.preventDefault();
+                    navigate(i - 1, true);
+                  }}
+                >
+                  ← Назад
+                </a>
+              ) : (
+                <span />
+              )}
+              {i < scenes.length - 1 ? (
+                <a
+                  href={`#${scenes[i + 1]?.id}`}
+                  onClick={(event) => {
+                    if (
+                      !hydrated ||
+                      event.metaKey ||
+                      event.ctrlKey ||
+                      event.shiftKey ||
+                      event.altKey
+                    )
+                      return;
+                    event.preventDefault();
+                    navigate(i + 1, true);
+                  }}
+                >
+                  Далее →
+                </a>
+              ) : (
+                <span />
+              )}
+            </nav>
+            <a
+              className="scene-permalink"
+              href={`#${item.id}`}
+              onClick={(event) => {
+                if (
+                  !hydrated ||
+                  event.metaKey ||
+                  event.ctrlKey ||
+                  event.shiftKey ||
+                  event.altKey
+                )
+                  return;
+                event.preventDefault();
+                navigate(i);
+              }}
+              aria-label={`Прямая ссылка: ${item.navTitle}`}
+            >
+              ↗ #{item.id}
+            </a>
           </section>
         ))}
       </div>
       <div className="story-workspace" id="story-workspace" tabIndex={-1}>
-        <nav className="scene-nav" aria-label={scenesLabel}>
-          {scenes.map((item, i) => (
-            <button
-              key={i}
-              type="button"
-              disabled={!hydrated}
-              aria-label={item.title}
-              aria-pressed={scene === i}
-              onClick={() => {
-                switchScene(i);
-                if (window.matchMedia("(min-width: 900px)").matches) {
-                  document
-                    .getElementById(`scene-${i + 1}`)
-                    ?.scrollIntoView({ block: "start", behavior: "instant" });
-                }
-              }}
-            >
-              {number(i)}
-            </button>
-          ))}
-        </nav>
         {lab(scene, hydrated)}
       </div>
     </div>

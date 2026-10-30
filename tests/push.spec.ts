@@ -1,10 +1,10 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { selectScene } from "./helpers/navigation";
 
 const run = (page: Page) =>
   page.getByRole("button", { name: /^Запустить( снова)?$/ }).click();
-const scene = (page: Page, name: string) =>
-  page.getByRole("button", { name, exact: true }).click();
+const scene = (page: Page, name: string) => selectScene(page, name);
 const status = (page: Page) => page.getByRole("status");
 
 test.beforeEach(async ({ page }) => {
@@ -20,9 +20,12 @@ test("the pull exploration leads to the push model and back", async ({
     .click();
   await expect(page).toHaveURL(/\/ru\/data-transfers\/push\/?$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Когда данные приходят сами.",
+    "Из одной системы в другую.",
   );
-  await page.getByRole("link", { name: /Pull: миллион записей/ }).click();
+  await page
+    .getByRole("navigation", { name: "Модели переноса данных" })
+    .getByRole("link", { name: /Читаем источник/ })
+    .click();
   await expect(page).toHaveURL(/\/ru\/data-transfers\/?$/);
   await page.goto("/data-transfers/push/");
   await expect(page).toHaveURL(/\/ru\/data-transfers\/push\/$/);
