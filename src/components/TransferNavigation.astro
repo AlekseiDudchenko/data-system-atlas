@@ -1,0 +1,36 @@
+---
+import { localeFromPath, localizedPath } from "../i18n";
+interface Props {
+  model: "pull" | "push";
+}
+const { model } = Astro.props;
+const locale = localeFromPath(Astro.url.pathname);
+---
+
+<header class="story-heading transfer-heading">
+  <nav class="story-breadcrumb" aria-label="Хлебные крошки">
+    <a href={`${localizedPath(locale)}#atlas`}>Атлас</a>
+    <span aria-hidden="true">/</span>
+    <span>Перенос данных</span>
+  </nav>
+  <h1>Из одной системы в другую.</h1>
+  <p class="story-intro">
+    Два способа переноса. Решения, их пределы и последствия.
+  </p>
+</header>
+<nav class="transfer-models" aria-label="Модели переноса данных">
+  <a
+    href={localizedPath(locale, "/data-transfers/")}
+    aria-current={model === "pull" ? "page" : undefined}
+  >
+    <span>Читаем источник</span>
+    <small>Pull · запросы по инициативе приёмника</small>
+  </a>
+  <a
+    href={localizedPath(locale, "/data-transfers/push/")}
+    aria-current={model === "push" ? "page" : undefined}
+  >
+    <span>Источник отправляет</span>
+    <small>Push · доставка событий</small>
+  </a>
+</nav>
