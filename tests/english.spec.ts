@@ -65,7 +65,7 @@ test("pull controls, results, diagrams and event logs use English", async ({
   await page
     .getByLabel("Checkpoint", { exact: true })
     .selectOption("before-write");
-  await page.getByRole("button", { name: "Run again", exact: true }).click();
+  await page.getByRole("button", { name: "Run transfer", exact: true }).click();
   await expect(page.getByRole("status")).toContainText(
     "Missing records: 1,000.",
   );
