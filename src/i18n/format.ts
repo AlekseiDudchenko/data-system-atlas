@@ -62,7 +62,7 @@ const russianPlurals = new Intl.PluralRules("ru");
 export function plural(
   count: number,
   forms: readonly [one: string, few: string, many: string],
-  locale: Locale = "ru",
+  locale: Locale,
 ): string {
   if (locale !== "ru") return count === 1 ? forms[0] : forms[2];
   const category = russianPlurals.select(count);

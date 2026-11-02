@@ -22,7 +22,7 @@ export const getNavigationCopy = (locale: Locale) =>
         intro: "Two transfer models. Decisions, limits and consequences.",
         models: "Data transfer models",
         pull: "Read from the source",
-        pullSub: "Pull · consumer-initiated requests",
+        pullSub: "Pull · target-initiated requests",
         push: "The source sends events",
         pushSub: "Push · event delivery",
         outline: "In this exploration",

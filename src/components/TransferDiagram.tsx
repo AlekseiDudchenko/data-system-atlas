@@ -74,8 +74,7 @@ function Diagram({
   geometry: g,
   className,
 }: Props & { geometry: Geometry; className: string }) {
-  const contextLocale = useLocale();
-  const locale = explicitLocale ?? contextLocale;
+  const locale = useLocale(explicitLocale);
   const c = getTransferCopy(locale);
   const marker = `transfer-${useId().replaceAll(":", "")}`;
   const { plan, costs } = estimate;
