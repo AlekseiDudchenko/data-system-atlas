@@ -1,10 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { localeFromPath, localizedPath } from "../i18n";
-import { homeCopy as c } from "../content/home";
+import { getHomeCopy } from "../content/localized";
 import TransferDiagram from "./TransferDiagram";
 import { estimateTransfer, progressAt } from "../simulation/transfer";
 const locale = localeFromPath(Astro.url.pathname);
+const c = getHomeCopy(locale);
 const preview = estimateTransfer({
   records: 1_000_000,
   reading: "lazy",
@@ -43,7 +44,11 @@ const previewProgress = progressAt(preview, preview.durationMs * 0.42);
         aria-label={c.open}
         tabindex="-1"
       >
-        <TransferDiagram estimate={preview} progress={previewProgress} />
+        <TransferDiagram
+          locale={locale}
+          estimate={preview}
+          progress={previewProgress}
+        />
         <span class="visual-caption">{c.path}</span>
       </a>
     </section>

@@ -27,7 +27,7 @@ test("the pull exploration leads to the push model and back", async ({
     .getByRole("link", { name: /Читаем источник/ })
     .click();
   await expect(page).toHaveURL(/\/ru\/data-transfers\/?$/);
-  await page.goto("/data-transfers/push/");
+  await page.goto("/de/data-transfers/push/");
   await expect(page).toHaveURL(/\/ru\/data-transfers\/push\/$/);
 });
 

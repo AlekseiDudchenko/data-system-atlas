@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { fill, transferCopy as c } from "../content/transfers";
+import { fill } from "../content/transfers";
+import { getTransferCopy } from "../content/localized";
+import { useLocale } from "../i18n/react";
+import type { Locale } from "../i18n";
 import {
   formatBytes,
   formatDuration,
@@ -46,17 +49,20 @@ function plans(scene: VolumeScene, choice: Choice) {
   return { now, before };
 }
 
-function strategy(plan: TransferPlan, scene: VolumeScene, isBefore: boolean) {
+function strategy(
+  plan: TransferPlan,
+  scene: VolumeScene,
+  isBefore: boolean,
+  locale: Locale,
+) {
+  const c = getTransferCopy(locale);
   if (isBefore && scene === 1)
-    return fill(c.smallerTable, formatNumber("ru", plan.records));
+    return fill(c.smallerTable, formatNumber(locale, plan.records));
   if (plan.reading === "eager") return c.eagerSingle;
   return plan.batchSize > 1
-    ? fill(c.lazyBatch, formatNumber("ru", plan.batchSize))
+    ? fill(c.lazyBatch, formatNumber(locale, plan.batchSize))
     : c.lazySingle;
 }
-
-const records = (n: number) =>
-  `${formatNumber("ru", n)} ${plural(n, c.words.record)}`;
 
 export default function VolumeLab({
   scene,
@@ -65,6 +71,10 @@ export default function VolumeLab({
   scene: VolumeScene;
   hydrated: boolean;
 }) {
+  const locale = useLocale();
+  const c = getTransferCopy(locale);
+  const records = (n: number) =>
+    `${formatNumber(locale, n)} ${plural(n, c.words.record, locale)}`;
   const [choice, setChoice] = useState<Choice>(defaults[scene]);
   const { share, ran, running, run, reset } = useRun();
   const { now, before } = plans(scene, choice);
@@ -83,15 +93,15 @@ export default function VolumeLab({
     progress.phase === "failed"
       ? fill(
           c.failed,
-          formatDuration("ru", estimate.durationMs),
-          formatBytes("ru", estimate.memoryNeededBytes),
-          formatBytes("ru", estimate.costs.memoryLimitBytes),
+          formatDuration(locale, estimate.durationMs),
+          formatBytes(locale, estimate.memoryNeededBytes),
+          formatBytes(locale, estimate.costs.memoryLimitBytes),
         )
       : progress.phase === "done"
         ? fill(
             c.done,
             records(now.records),
-            formatDuration("ru", estimate.durationMs),
+            formatDuration(locale, estimate.durationMs),
           )
         : progress.phase === "reading"
           ? c.reading
@@ -104,7 +114,7 @@ export default function VolumeLab({
 
   return (
     <>
-      <p className="lab-mode">{strategy(now, scene, false)}</p>
+      <p className="lab-mode">{strategy(now, scene, false, locale)}</p>
       <TransferDiagram
         estimate={estimate}
         progress={progress}
@@ -113,13 +123,13 @@ export default function VolumeLab({
       <div className="story-counters">
         <span>
           {c.elapsed}
-          <strong>{formatDuration("ru", progress.elapsedMs)}</strong>
+          <strong>{formatDuration(locale, progress.elapsedMs)}</strong>
         </span>
         <span>
           {c.written}
           <strong>
-            {formatNumber("ru", progress.recordsWritten)}
-            <span> / {formatNumber("ru", now.records)}</span>
+            {formatNumber(locale, progress.recordsWritten)}
+            <span> / {formatNumber(locale, now.records)}</span>
           </strong>
         </span>
       </div>
@@ -139,7 +149,7 @@ export default function VolumeLab({
           >
             {recordOptions.map((option) => (
               <option key={option} value={option}>
-                {formatNumber("ru", option)}
+                {formatNumber(locale, option)}
               </option>
             ))}
           </select>
@@ -156,7 +166,7 @@ export default function VolumeLab({
             >
               {batchOptions.map((option) => (
                 <option key={option} value={option}>
-                  {option === 1 ? c.perRecord : formatNumber("ru", option)}
+                  {option === 1 ? c.perRecord : formatNumber(locale, option)}
                 </option>
               ))}
             </select>
@@ -176,42 +186,42 @@ export default function VolumeLab({
               ? [
                   {
                     title: c.before,
-                    subtitle: strategy(previous.plan, scene, true),
+                    subtitle: strategy(previous.plan, scene, true, locale),
                   },
                 ]
               : []),
-            { title: c.after, subtitle: strategy(now, scene, false) },
+            { title: c.after, subtitle: strategy(now, scene, false, locale) },
           ]}
           rows={[
             {
               label: c.duration,
               values: value((e) =>
                 e.outcome === "completed"
-                  ? formatDuration("ru", e.durationMs)
-                  : `${c.outOfMemory} · ${formatDuration("ru", e.durationMs)}`,
+                  ? formatDuration(locale, e.durationMs)
+                  : `${c.outOfMemory} · ${formatDuration(locale, e.durationMs)}`,
               ),
             },
             {
               label: c.throughput,
               values: value((e) =>
                 e.outcome === "completed"
-                  ? fill(c.perSecond, formatNumber("ru", e.recordsPerSecond))
+                  ? fill(c.perSecond, formatNumber(locale, e.recordsPerSecond))
                   : c.notReached,
               ),
             },
             {
               label: c.roundTrips,
               values: value((e) =>
-                formatNumber("ru", e.readRoundTrips + e.writeRoundTrips),
+                formatNumber(locale, e.readRoundTrips + e.writeRoundTrips),
               ),
             },
             {
               label: c.peakMemory,
-              values: value((e) => formatBytes("ru", e.memoryNeededBytes)),
+              values: value((e) => formatBytes(locale, e.memoryNeededBytes)),
             },
             {
               label: c.cursorOpen,
-              values: value((e) => formatDuration("ru", e.cursorOpenMs)),
+              values: value((e) => formatDuration(locale, e.cursorOpenMs)),
             },
           ]}
         />

@@ -56,6 +56,13 @@ const description =
           }
         />
       ))}
+    {publishedLocales.length > 1 && (
+      <link
+        rel="alternate"
+        hreflang="x-default"
+        href={new URL(localizedPath("en", Astro.url.pathname), Astro.site)}
+      />
+    )}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body class:list={{ editorial: Astro.props.editorial }}>
@@ -81,6 +88,7 @@ const description =
             {publishedLocales.map((language) => (
               <a
                 href={localizedPath(language, Astro.url.pathname)}
+                data-language-path={localizedPath(language, Astro.url.pathname)}
                 lang={language}
                 hreflang={language}
                 aria-current={language === locale ? "page" : undefined}
@@ -135,4 +143,20 @@ const description =
     });
     systemTheme.addEventListener("change", syncToggle);
   }
+</script>
+
+<script>
+  // Fragments are shared across languages, including changes made by scroll navigation.
+  const languageLinks = document.querySelectorAll<HTMLAnchorElement>(
+    "[data-language-path]",
+  );
+  const syncLanguageLinks = () => {
+    languageLinks.forEach((link) => {
+      link.href = `${link.dataset.languagePath}${window.location.hash}`;
+    });
+  };
+  syncLanguageLinks();
+  window.addEventListener("hashchange", syncLanguageLinks);
+  window.addEventListener("popstate", syncLanguageLinks);
+  window.addEventListener("atlas:scenechange", syncLanguageLinks);
 </script>

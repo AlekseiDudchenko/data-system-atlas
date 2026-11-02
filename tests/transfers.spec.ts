@@ -21,7 +21,7 @@ test.beforeEach(async ({ page }) => {
 test("entry points lead to the Russian home and its only exploration", async ({
   page,
 }) => {
-  for (const entry of ["/", "/de/"]) {
+  for (const entry of ["/ru/", "/de/"]) {
     await page.goto(entry);
     await expect(page).toHaveURL(/\/ru\/$/);
   }
@@ -29,7 +29,7 @@ test("entry points lead to the Russian home and its only exploration", async ({
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Как работают системы данных",
   );
-  await expect(page.locator(".language-switcher")).toHaveCount(0);
+  await expect(page.locator(".language-switcher a")).toHaveCount(2);
   await page
     .getByRole("link", { name: "Исследовать перенос данных", exact: true })
     .filter({ hasNot: page.locator("svg") })

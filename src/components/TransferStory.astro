@@ -3,9 +3,16 @@ import Layout from "../layouts/Layout.astro";
 import TransferNavigation from "./TransferNavigation.astro";
 import TransferExplorer from "./TransferExplorer";
 import { localeFromPath, localizedPath } from "../i18n";
-import { transferCopy as c } from "../content/transfers";
-import { pushCopy } from "../content/push";
+import {
+  getTransferCopy,
+  getPushCopy,
+  getNavigationCopy,
+} from "../content/localized";
+
 const locale = localeFromPath(Astro.url.pathname);
+const c = getTransferCopy(locale);
+const n = getNavigationCopy(locale);
+const pushCopy = getPushCopy(locale);
 ---
 
 <Layout title={c.category} description={c.intro} editorial>
@@ -15,7 +22,7 @@ const locale = localeFromPath(Astro.url.pathname);
     <noscript>
       <p class="story-noscript">{c.noJs}</p>
     </noscript>
-    <TransferExplorer client:load />
+    <TransferExplorer locale={locale} client:load />
     <section class="story-next" aria-labelledby="next-title">
       <p class="story-kicker">{pushCopy.next}</p>
       <h2 id="next-title">{pushCopy.nextLink}</h2>
@@ -39,13 +46,13 @@ const locale = localeFromPath(Astro.url.pathname);
         <h2>{c.sources}</h2>
         <p>{c.sourcesIntro}</p>
         <a href="https://www.postgresql.org/docs/current/sql-declare.html">
-          PostgreSQL — DECLARE, курсоры ↗
+          {n.cursorSource} ↗
         </a>
         <a href="https://jdbc.postgresql.org/documentation/query/#getting-results-based-on-a-cursor">
-          PostgreSQL JDBC — чтение через курсор ↗
+          {n.jdbcSource} ↗
         </a>
         <a href="https://www.postgresql.org/docs/current/populate.html">
-          PostgreSQL — массовая загрузка данных ↗
+          {n.bulkSource} ↗
         </a>
         <a href="https://github.com/AlekseiDudchenko/data-transfer-service/blob/docs/large-data-transfer-notes/scaling-large-data-transfers-minimal.html">
           {c.notes} ↗

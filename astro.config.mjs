@@ -9,13 +9,10 @@ export default defineConfig({
     locales: ["en", "de", "ru"],
     routing: { prefixDefaultLocale: false },
   },
-  // Russian only for now: other entry points lead to the Russian pages.
+  // German remains unpublished; English uses unprefixed routes.
   redirects: {
-    "/": "/ru/",
     "/de": "/ru/",
-    "/data-transfers": "/ru/data-transfers/",
     "/de/data-transfers": "/ru/data-transfers/",
-    "/data-transfers/push": "/ru/data-transfers/push/",
     "/de/data-transfers/push": "/ru/data-transfers/push/",
   },
   integrations: [react(), mdx()],

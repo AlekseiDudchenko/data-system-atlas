@@ -11,15 +11,10 @@
 /ru/partitioning/* /ru/ 301
 /ru/migration /ru/ 301
 /ru/migration/* /ru/ 301
-# Russian only for now; English and German return after translation.
-/ /ru/ 302
+# German remains unpublished; English uses unprefixed routes.
 /de /ru/ 302
 /de/ /ru/ 302
-/data-transfers/push /ru/data-transfers/push/ 302
-/data-transfers/push/ /ru/data-transfers/push/ 302
 /de/data-transfers/push /ru/data-transfers/push/ 302
 /de/data-transfers/push/ /ru/data-transfers/push/ 302
-/data-transfers /ru/data-transfers/ 302
-/data-transfers/ /ru/data-transfers/ 302
 /de/data-transfers /ru/data-transfers/ 302
 /de/data-transfers/ /ru/data-transfers/ 302

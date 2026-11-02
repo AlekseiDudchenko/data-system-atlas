@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { pushCopy as c } from "../content/push";
+import { getPushCopy } from "../content/localized";
+import { useLocale } from "../i18n/react";
+import type { Locale } from "../i18n";
 import { fill } from "../content/transfers";
 import { formatDuration, formatNumber, plural } from "../i18n/format";
 import {
@@ -114,7 +116,8 @@ function alternative(scene: PushScene, plan: PushPlan): PushPlan | null {
   }
 }
 
-function describe(scene: PushScene, plan: PushPlan) {
+function describe(scene: PushScene, plan: PushPlan, locale: Locale) {
+  const c = getPushCopy(locale);
   switch (scene) {
     case 0:
     case 1:
@@ -130,10 +133,6 @@ function describe(scene: PushScene, plan: PushPlan) {
   }
 }
 
-const events = (n: number) =>
-  `${formatNumber("ru", n)} ${plural(n, c.words.event)}`;
-const seconds = (s: number) => formatDuration("ru", s * 1_000);
-
 export default function PushLab({
   scene,
   hydrated,
@@ -141,6 +140,12 @@ export default function PushLab({
   scene: PushScene;
   hydrated: boolean;
 }) {
+  const locale = useLocale();
+  const c = getPushCopy(locale);
+  const events = (n: number) =>
+    `${formatNumber(locale, n)} ${plural(n, c.words.event, locale)}`;
+  const seconds = (s: number) => formatDuration(locale, s * 1_000);
+
   const [knobs, setKnobs] = useState<Knobs>(defaults);
   const { share, ran, running, run, reset } = useRun(4_000);
   const plan = planFor(scene, knobs);
@@ -163,7 +168,9 @@ export default function PushLab({
     [c.dlq, end.deadLettered],
   ]
     .filter(([, n]) => Number(n) > 0)
-    .map(([label, n]) => fill(c.detail, label!, formatNumber("ru", Number(n))));
+    .map(([label, n]) =>
+      fill(c.detail, label!, formatNumber(locale, Number(n))),
+    );
   const recovery =
     result.recoveryS !== null
       ? fill(c.recovered, seconds(result.recoveryS))
@@ -172,7 +179,7 @@ export default function PushLab({
         : "";
   const status = finished
     ? [
-        fill(c.done, events(end.written), formatNumber("ru", end.lag)),
+        fill(c.done, events(end.written), formatNumber(locale, end.lag)),
         ...details,
         recovery,
       ]
@@ -187,7 +194,7 @@ export default function PushLab({
 
   return (
     <>
-      <p className="lab-mode">{describe(scene, plan)}</p>
+      <p className="lab-mode">{describe(scene, plan, locale)}</p>
       <PushFlow plan={plan} tick={shown} />
       <LagChart run={result} upTo={started ? index : -1} />
       <div className="story-counters">
@@ -197,15 +204,15 @@ export default function PushLab({
         </span>
         <span>
           {c.lag}
-          <strong>{formatNumber("ru", shown?.lag ?? 0)}</strong>
+          <strong>{formatNumber(locale, shown?.lag ?? 0)}</strong>
         </span>
         <span>
           {c.written}
-          <strong>{formatNumber("ru", shown?.written ?? 0)}</strong>
+          <strong>{formatNumber(locale, shown?.written ?? 0)}</strong>
         </span>
         <span>
           {c.lost}
-          <strong>{formatNumber("ru", shown?.lost ?? 0)}</strong>
+          <strong>{formatNumber(locale, shown?.lost ?? 0)}</strong>
         </span>
         {scene === 2 && (
           <span>
@@ -216,7 +223,7 @@ export default function PushLab({
         {scene === 3 && (
           <span>
             {c.duplicates}
-            <strong>{formatNumber("ru", shown?.duplicates ?? 0)}</strong>
+            <strong>{formatNumber(locale, shown?.duplicates ?? 0)}</strong>
           </span>
         )}
       </div>
@@ -241,7 +248,7 @@ export default function PushLab({
             label={c.consumerRate}
             value={knobs.consumerRate}
             options={[1_200, 1_500, 3_000]}
-            format={(v) => fill(c.perSecond, formatNumber("ru", v))}
+            format={(v) => fill(c.perSecond, formatNumber(locale, v))}
             onChange={(consumerRate) => change({ consumerRate })}
           />
         )}
@@ -259,7 +266,7 @@ export default function PushLab({
               label={c.commitEvery}
               value={knobs.commitEveryS}
               options={[0.5, 2, 5]}
-              format={(v) => fill(c.seconds, formatNumber("ru", v, 1))}
+              format={(v) => fill(c.seconds, formatNumber(locale, v, 1))}
               onChange={(commitEveryS) => change({ commitEveryS })}
             />
             <Check
@@ -276,7 +283,7 @@ export default function PushLab({
               label={c.rate}
               value={knobs.rate}
               options={[2_000, 4_000, 6_000]}
-              format={(v) => fill(c.perSecond, formatNumber("ru", v))}
+              format={(v) => fill(c.perSecond, formatNumber(locale, v))}
               onChange={(rate) => change({ rate })}
             />
             <Select
@@ -305,12 +312,12 @@ export default function PushLab({
         <CompareTable
           columns={compared.map((r, i) => ({
             title: other && i === 0 ? c.alternative : c.now,
-            subtitle: describe(scene, r.plan),
+            subtitle: describe(scene, r.plan, locale),
           }))}
           rows={[
             {
               label: c.maxLag,
-              values: compared.map((r) => formatNumber("ru", r.maxLag)),
+              values: compared.map((r) => formatNumber(locale, r.maxLag)),
             },
             {
               label: c.recovery,
@@ -325,25 +332,25 @@ export default function PushLab({
             {
               label: c.lagEnd,
               values: compared.map((r) =>
-                formatNumber("ru", r.ticks.at(-1)!.lag),
+                formatNumber(locale, r.ticks.at(-1)!.lag),
               ),
             },
             {
               label: c.written,
               values: compared.map((r) =>
-                formatNumber("ru", r.ticks.at(-1)!.written),
+                formatNumber(locale, r.ticks.at(-1)!.written),
               ),
             },
             {
               label: c.lost,
               values: compared.map((r) =>
-                formatNumber("ru", r.ticks.at(-1)!.lost),
+                formatNumber(locale, r.ticks.at(-1)!.lost),
               ),
             },
             {
               label: c.duplicates,
               values: compared.map((r) =>
-                formatNumber("ru", r.ticks.at(-1)!.duplicates),
+                formatNumber(locale, r.ticks.at(-1)!.duplicates),
               ),
             },
             {
@@ -424,6 +431,8 @@ function Check({
 }
 
 function PushFlow({ plan, tick }: { plan: PushPlan; tick: PushTick | null }) {
+  const locale = useLocale();
+  const c = getPushCopy(locale);
   const direct = plan.mode === "direct";
   const partitions = direct ? 1 : plan.partitions;
   const consumers = direct ? 1 : plan.consumers;
@@ -441,7 +450,7 @@ function PushFlow({ plan, tick }: { plan: PushPlan; tick: PushTick | null }) {
     <div className="push-flow">
       <div className="push-node">
         <span className="push-name">{c.producer}</span>
-        <strong>{fill(c.perSecond, formatNumber("ru", plan.rate))}</strong>
+        <strong>{fill(c.perSecond, formatNumber(locale, plan.rate))}</strong>
       </div>
       <span className="push-arrow" aria-hidden="true">
         →
@@ -462,12 +471,14 @@ function PushFlow({ plan, tick }: { plan: PushPlan; tick: PushTick | null }) {
                     style={{ width: `${Math.min(depth / limit, 1) * 100}%` }}
                   />
                 </span>
-                <span className="part-count">{formatNumber("ru", depth)}</span>
+                <span className="part-count">
+                  {formatNumber(locale, depth)}
+                </span>
               </li>
             );
           })}
         </ol>
-        <small>{fill(c.capacity, formatNumber("ru", plan.capacity))}</small>
+        <small>{fill(c.capacity, formatNumber(locale, plan.capacity))}</small>
       </div>
       <span className="push-arrow" aria-hidden="true">
         →
@@ -504,6 +515,8 @@ function PushFlow({ plan, tick }: { plan: PushPlan; tick: PushTick | null }) {
 }
 
 function LagChart({ run, upTo }: { run: PushRun; upTo: number }) {
+  const locale = useLocale();
+  const c = getPushCopy(locale);
   const width = 600;
   const height = 120;
   const total = run.ticks.length;
@@ -522,7 +535,7 @@ function LagChart({ run, upTo }: { run: PushRun; upTo: number }) {
     <figure className="lag-chart">
       <figcaption>
         <span>{c.chart}</span>
-        <span>{fill(c.chartMax, formatNumber("ru", shownMax))}</span>
+        <span>{fill(c.chartMax, formatNumber(locale, shownMax))}</span>
       </figcaption>
       <svg
         viewBox={`0 0 ${width} ${height}`}
@@ -530,8 +543,8 @@ function LagChart({ run, upTo }: { run: PushRun; upTo: number }) {
         role="img"
         aria-label={fill(
           c.chartLabel,
-          formatNumber("ru", shownMax),
-          formatNumber("ru", upTo >= 0 ? run.ticks[upTo]!.lag : 0),
+          formatNumber(locale, shownMax),
+          formatNumber(locale, upTo >= 0 ? run.ticks[upTo]!.lag : 0),
         )}
       >
         {run.plan.outageS > 0 && (

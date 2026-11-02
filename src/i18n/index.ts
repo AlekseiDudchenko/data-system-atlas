@@ -3,8 +3,8 @@ import ru from "./ru";
 
 export const locales = ["en", "de", "ru"] as const;
 export type Locale = (typeof locales)[number];
-/** Languages with built pages. Russian only for now; others return after translation. */
-export const publishedLocales: readonly Locale[] = ["ru"];
+/** Languages with built pages. German returns after translation. */
+export const publishedLocales: readonly Locale[] = ["en", "ru"];
 type Key = keyof typeof de;
 const dictionaries: Record<Exclude<Locale, "en">, Record<Key, string>> = {
   de,

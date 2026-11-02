@@ -2,10 +2,10 @@
 
 Direction: [VISION.md](../VISION.md), agreed 2026-10-28. Active work lives in GitHub Issues; this file keeps the order and the decisions behind it. Build one strong exploration before extracting shared abstractions.
 
-## Status — 2026-10-29
+## Status — 2026-11-02
 
-- Shipped and verified in production ([record](production-validation.md)): P0 in PR #27 (scenes 1–4 and the home page), P1 in PR #28 (scenes 5–8: failures, retries, idempotency, checkpoints, parallel pull), P2 in PR #29 (the push page). Issues #20–#26 are closed.
-- Decisions: keep the headline "How data systems work"; Scaling Large Data Transfers is the first and only exploration; the earlier lessons and the migration prototype are retired; no "How it works" block and no About page; the site is Russian only for now (`/`, `/de/` redirect to `/ru/`).
+- Shipped and verified in production ([record](production-validation.md)): P0 in PR #27 (scenes 1–4 and the home page), P1 in PR #28 (scenes 5–8: failures, retries, idempotency, checkpoints, parallel pull), P2 in PR #29 (the push page). Issues #20–#26 are closed. Named steps, a model switcher and direct scene links shipped in PR #34 (#33); the complete English version in PR #36 (#35).
+- Decisions: keep the headline "How data systems work"; Scaling Large Data Transfers is the first and only exploration; the earlier lessons and the migration prototype are retired; no "How it works" block and no About page; English is published at unprefixed routes (`/`, `/data-transfers/`, `/data-transfers/push/`) and Russian at `/ru/`; German routes redirect to Russian until translated.
 - GitHub Actions are unavailable (#16). Validate locally and record which checks ran.
 
 ## P0 — first exploration
@@ -30,7 +30,7 @@ Direction: [VISION.md](../VISION.md), agreed 2026-10-28. Active work lives in Gi
 
 ## Next, not scheduled
 
-- English and German translations of both pages, then the language switcher returns.
+- German translation of both pages. English shipped in PR #36; keep English and Russian in sync.
 - Live migration with CDC (snapshot + change stream + cutover; the retired prototype in `d560b54` is a starting point), multiple sources, mapping, validation and reconciliation.
 - Replay and schema evolution on the push page; transaction boundaries and partial batch failures on the pull page.
 - Learner feedback on the exploration before adding a second one.

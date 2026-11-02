@@ -1,4 +1,5 @@
-import { transferCopy as c } from "../content/transfers";
+import { getTransferCopy } from "../content/localized";
+import { useLocale } from "../i18n/react";
 
 export type Column = { title: string; subtitle: string };
 export type Row = { label: string; values: readonly string[] };
@@ -11,6 +12,7 @@ export default function CompareTable({
   columns: readonly Column[];
   rows: readonly Row[];
 }) {
+  const c = getTransferCopy(useLocale());
   return (
     <div className="story-compare">
       <table>

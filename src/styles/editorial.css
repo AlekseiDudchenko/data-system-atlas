@@ -1289,3 +1289,29 @@
     align-items: center;
   }
 }
+
+/* Keep the language switcher reachable without leaving the active desktop scene. */
+@media (min-width: 900px) {
+  .editorial:has(.story) .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    height: 76px;
+    background: var(--page);
+    flex-wrap: nowrap;
+  }
+  .transfer-models {
+    top: 76px;
+  }
+  .scene-outline {
+    top: 198px;
+  }
+  .story-workspace {
+    top: 184px;
+    max-height: calc(100vh - 200px);
+  }
+  .story-scene,
+  .story-explorer {
+    scroll-margin-top: 198px;
+  }
+}
