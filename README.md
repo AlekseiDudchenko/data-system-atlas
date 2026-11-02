@@ -10,6 +10,8 @@ Live site: [Data Systems Atlas](https://data-systems-atlas.dudchenko.org/).
 
 `/ru/data-transfers/push/` — **the push model.** When the source sends events itself: a direct push that loses events during a target outage, a queue that buffers them and the lag it builds, a poison message and a dead-letter queue, redelivery after a consumer crash and idempotent writes, and consumer groups that cannot keep up with a hot partition. A pull-or-push table closes the page; push is a different operating model, not the next step of pull ([ADR 0008](docs/adr/0008-push-model.md)).
 
+Both transfer models share a persistent model switcher, named steps, previous/next links and direct URLs such as `/ru/data-transfers/#checkpoint` and `/ru/data-transfers/push/#redelivery`. Desktop scrolling selects the matching experiment; on mobile a native selector chooses the situation. Refresh and browser history restore the selection, and the outline and prose remain readable without JavaScript. Legacy `#scene-N` links are normalized after hydration.
+
 The site is Russian only for now. `/`, `/de/`, `/data-transfers/` and `/data-transfers/push/` redirect to the Russian pages; English and German return after translation.
 
 ## Development

@@ -515,7 +515,7 @@ footer {
     gap: 12px;
     font-size: 0.72rem;
   }
-  nav a:first-child {
+  .main-nav a:first-child {
     display: none;
   }
   main {

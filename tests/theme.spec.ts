@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { selectScene } from "./helpers/navigation";
 
 test("theme follows the system and keeps a keyboard override across pages and reloads", async ({
   page,
@@ -29,9 +30,7 @@ test("dark pages and simulation feedback retain contrast and mobile reflow", asy
   for (const path of ["/ru/", "/ru/data-transfers/"]) {
     await page.goto(path);
     if (path !== "/ru/") {
-      await page
-        .getByRole("button", { name: "Пишем пакетами.", exact: true })
-        .click();
+      await selectScene(page, "Пишем пакетами.");
       await page.getByRole("button", { name: "Запустить перенос" }).click();
       await expect(page.getByRole("status")).toContainText("Готово");
     }

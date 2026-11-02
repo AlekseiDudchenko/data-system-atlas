@@ -1,22 +1,14 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import TransferNavigation from "./TransferNavigation.astro";
 import PushExplorer from "./PushExplorer";
-import { localeFromPath, localizedPath } from "../i18n";
 import { pushCopy as c } from "../content/push";
-const locale = localeFromPath(Astro.url.pathname);
 ---
 
 <Layout title={c.category} description={c.intro} editorial>
   <div class="story">
-    <header class="story-heading">
-      <a class="story-back" href={localizedPath(locale, "/data-transfers/")}>
-        ← {c.back}
-      </a>
-      <p class="story-kicker">01 — {c.category}</p>
-      <h1>{c.title}</h1>
-      <p class="story-intro">{c.intro}</p>
-      <p class="story-scroll">↓ {c.scroll}</p>
-    </header>
+    <TransferNavigation model="push" />
+    <p class="model-intro">{c.intro}</p>
     <noscript>
       <p class="story-noscript">{c.noJs}</p>
     </noscript>

@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { selectScene } from "./helpers/navigation";
 
 const run = (page: Page) =>
   page.getByRole("button", { name: /^Запустить (перенос|снова)$/ }).click();
@@ -35,7 +36,7 @@ test("entry points lead to the Russian home and its only exploration", async ({
     .click();
   await expect(page).toHaveURL(/\/ru\/data-transfers\/?$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Миллион записей. Простой скрипт.",
+    "Из одной системы в другую.",
   );
   await noOverflow(page);
 });
@@ -48,9 +49,7 @@ test("a sequential copy works, a million records run out of memory", async ({
   await expect(page.getByRole("status")).toHaveText(
     /Готово: 1\s000 записей за 2,1\sс\./,
   );
-  await page
-    .getByRole("button", { name: "Теперь — миллион.", exact: true })
-    .click();
+  await selectScene(page, "Теперь — миллион.");
   await expect(page.getByLabel("Записей", { exact: true })).toHaveValue(
     "1000000",
   );
@@ -69,16 +68,12 @@ test("a sequential copy works, a million records run out of memory", async ({
 
 test("lazy reading completes; batches cut round trips", async ({ page }) => {
   await page.goto("/ru/data-transfers/");
-  await page
-    .getByRole("button", { name: "Читаем лениво.", exact: true })
-    .click();
+  await selectScene(page, "Читаем лениво.");
   await run(page);
   await expect(page.getByRole("status")).toHaveText(
     /Готово: 1\s000\s000 записей за 34 мин 17 с\./,
   );
-  await page
-    .getByRole("button", { name: "Пишем пакетами.", exact: true })
-    .click();
+  await selectScene(page, "Пишем пакетами.");
   await expect(page.getByLabel("Размер пакета", { exact: true })).toHaveValue(
     "1000",
   );
@@ -102,9 +97,7 @@ test("retries finish the copy but a lost acknowledgement duplicates a batch", as
   page,
 }) => {
   await page.goto("/ru/data-transfers/");
-  await page
-    .getByRole("button", { name: "Сеть иногда рвётся.", exact: true })
-    .click();
+  await selectScene(page, "Сеть иногда рвётся.");
   await run(page);
   await expect(page.getByRole("status")).toHaveText(
     /Перенос прерван на пакете 121 .* Уникальных записей: 120\s000\./,
@@ -123,9 +116,7 @@ test("upserts remove duplicates; checkpoint order decides between replay and los
   page,
 }) => {
   await page.goto("/ru/data-transfers/");
-  await page
-    .getByRole("button", { name: "Повтор не должен дублировать.", exact: true })
-    .click();
+  await selectScene(page, "Повтор не должен дублировать.");
   await run(page);
   await expect(page.getByRole("status")).toHaveText(/Дубликатов: 642\s000\.$/);
   await page
@@ -135,9 +126,7 @@ test("upserts remove duplicates; checkpoint order decides between replay and los
   await expect(page.getByRole("status")).not.toContainText("Дубликатов");
   await expect(page.getByRole("status")).toContainText("Переписано повторно");
 
-  await page
-    .getByRole("button", { name: "Запомним, где остановились.", exact: true })
-    .click();
+  await selectScene(page, "Запомним, где остановились.");
   await run(page);
   await expect(page.getByRole("status")).toHaveText(
     /Уникальных записей: 1\s000\s000\. Переписано повторно: 2\s000\.$/,
@@ -156,9 +145,7 @@ test("more readers help until the target saturates or one range dominates", asyn
   page,
 }) => {
   await page.goto("/ru/data-transfers/");
-  await page
-    .getByRole("button", { name: "Несколько читателей.", exact: true })
-    .click();
+  await selectScene(page, "Несколько читателей.");
   const workers = page.getByLabel("Читателей", { exact: true });
   await expect(workers).toHaveValue("4");
   await run(page);
@@ -178,9 +165,7 @@ test("the animation shows a run in progress before it finishes", async ({
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/ru/data-transfers/");
-  await page
-    .getByRole("button", { name: "Пишем пакетами.", exact: true })
-    .click();
+  await selectScene(page, "Пишем пакетами.");
   await page.getByRole("button", { name: "Запустить перенос" }).click();
   await expect(page.getByRole("status")).toHaveText("Запись в приёмник…");
   await expect(
@@ -202,7 +187,7 @@ test("pages are accessible in both themes and reflow", async ({ page }) => {
           "Запомним, где остановились.",
           "Несколько читателей.",
         ]) {
-          await page.getByRole("button", { name: scene, exact: true }).click();
+          await selectScene(page, scene);
           await run(page);
           expect(
             (
